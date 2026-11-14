@@ -1,0 +1,5 @@
+numpy>=1.24
+scipy>=1.10
+matplotlib>=3.7
+mujoco>=3.2,<4
+# --hw: use the lab's existing FrankaPy/ROS + autolab_core environment.
