@@ -55,6 +55,25 @@ class FrankaPyBackend:
         self.config = config
         self.clock, self.sleep = clock, sleep
         self.trace = []
+        self.last_motion = None
+
+    def joint_diagnostics(self):
+        """Optional read-only telemetry; never substitute it for motion checks."""
+        state = {}
+        for name, method in (('joints_rad','get_joints'),('joint_velocities_rad_s','get_joint_velocities')):
+            getter = getattr(self.arm,method,None)
+            if getter is None:
+                state[name] = None
+                continue
+            try:
+                values = np.asarray(getter(),dtype=float)
+                if values.shape != (7,) or not np.isfinite(values).all():
+                    raise ValueError('Expected seven finite values')
+                state[name] = values.tolist()
+            except Exception as error:
+                state[name] = None
+                state[name+'_read_error'] = str(error)
+        return state
 
     def pose(self):
         pose = self.arm.get_pose()
@@ -66,23 +85,34 @@ class FrankaPyBackend:
     def move(self, xyz, rotation, duration, label):
         pose = self.transform_cls(rotation=np.asarray(rotation),translation=np.asarray(xyz),
                                   from_frame='franka_tool',to_frame='world')
-        self.arm.goto_pose(pose,duration=duration,use_impedance=self.config['use_impedance'],
-                          block=False,ignore_errors=False,ignore_virtual_walls=False,
-                          skill_desc=label)
-        deadline = self.clock() + duration + self.config['motion_timeout_margin_s']
-        while not self.arm.is_skill_done(ignore_errors=False):
-            if self.clock() > deadline:
-                raise TimeoutError(f'Motion timed out: {label}')
-            self.sleep(.02)
-        actual_xyz, actual_rotation = self.pose()
-        pos_error = float(np.linalg.norm(actual_xyz-xyz))
-        angle = float(np.arccos(np.clip((np.trace(actual_rotation.T@rotation)-1)/2,-1.,1.)))
-        self.trace.append({'operation':'goto_pose','label':label,'translation':np.asarray(xyz).tolist(),
-                           'rotation':np.asarray(rotation).tolist(),'duration_s':float(duration),
-                           'actual_translation':actual_xyz.tolist(),
-                           'translation_error_m':pos_error,'rotation_error_rad':angle})
-        if pos_error > self.config['translation_tolerance_m'] or angle > self.config['rotation_tolerance_rad']:
-            raise RuntimeError(f'Motion feedback outside tolerance: {label}; position={pos_error:.4f} m, angle={angle:.4f} rad')
+        entry = {'operation':'goto_pose','label':label,'translation':np.asarray(xyz).tolist(),
+                 'rotation':np.asarray(rotation).tolist(),'duration_s':float(duration),
+                 'use_impedance':self.config['use_impedance'],'status':'STARTED',
+                 'start_joint_state':self.joint_diagnostics()}
+        self.trace.append(entry)
+        self.last_motion = entry
+        try:
+            self.arm.goto_pose(pose,duration=duration,use_impedance=self.config['use_impedance'],
+                              block=False,ignore_errors=False,ignore_virtual_walls=False,
+                              skill_desc=label)
+            deadline = self.clock() + duration + self.config['motion_timeout_margin_s']
+            while not self.arm.is_skill_done(ignore_errors=False):
+                if self.clock() > deadline:
+                    raise TimeoutError(f'Motion timed out: {label}')
+                self.sleep(.02)
+            actual_xyz, actual_rotation = self.pose()
+            pos_error = float(np.linalg.norm(actual_xyz-xyz))
+            angle = float(np.arccos(np.clip((np.trace(actual_rotation.T@rotation)-1)/2,-1.,1.)))
+            entry.update(actual_translation=actual_xyz.tolist(),translation_error_m=pos_error,
+                         rotation_error_rad=angle)
+            if pos_error > self.config['translation_tolerance_m'] or angle > self.config['rotation_tolerance_rad']:
+                raise RuntimeError(f'Motion feedback outside tolerance: {label}; position={pos_error:.4f} m, angle={angle:.4f} rad')
+            entry['status'] = 'COMPLETED'
+        except BaseException as error:
+            # Preserve the controller error before any further robot reads.
+            # A faulted interface must not hide it behind a telemetry wait.
+            entry.update(status='FAILED',error=f'{type(error).__name__}: {error}')
+            raise
 
     def gripper(self, grasp, label):
         width = self.config['gripper_grasp_width_m'] if grasp else self.config['gripper_open_width_m']

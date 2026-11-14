@@ -37,6 +37,11 @@ Print the current pose without commanding motion:
 python3 run.py --read-pose
 ```
 
+This also prints available joint positions and velocities for posture and
+motion-boundary diagnosis, without sending motion commands. If the robot is
+faulted, follow the lab operator's recovery procedure before querying its
+ready interface; do not automatically retry the failed motion.
+
 ## Run
 
 Run these commands from this folder. The default previews commands without
@@ -78,7 +83,9 @@ the corresponding physical run with blocks is:
 python3 run.py --execute --final-reset --speed-scale 2
 ```
 
-The default is `--speed-scale 1`. Scale 2 doubles the configured translation,
+The default is `--speed-scale 1`; `--speed-scale 0.5` halves the configured
+arm speeds and doubles the requested arm durations for diagnostic previews.
+Scale 2 doubles the configured translation,
 vertical, and rotation speed settings and halves the minimum motion duration.
 The measured `calibration.json` file is unchanged. Gripper speed/force, jaw
 widths, grasp checks, pose tolerances, workspace checks, and reflex handling
@@ -99,6 +106,27 @@ The final `report.json` includes `error` and `failed_phase`. Dry-run output is
 saved separately under `results/franka_dry_run/`.
 Both reports and progress record `motion_speed_scale`; the final report also
 records the base motion settings and effective configuration.
+
+For `cartesian_motion_generator_joint_acceleration_discontinuity`, the robot
+has rejected discontinuous joint acceleration after Cartesian inverse
+kinematics. This is not a 0.30 m height limit. Changing the grasp height or
+frame does not address this error. A slower timing profile is a diagnostic,
+not a guaranteed solution: Cartesian speed limits do not bound joint-space
+acceleration/jerk or guarantee a nonsingular posture. For a fixed time-scaled
+path, doubling speed can multiply acceleration by four and jerk by eight.
+
+Generate a slower preview without robot motion:
+
+```bash
+python3 run.py --final-reset --speed-scale 0.5
+```
+
+Before any physical retry, have the lab operator resolve the fault and verify
+the failing phase, pose and robot posture. The code does not automatically
+recover or retry it. `progress.json` now includes `last_motion`: the failed
+target, duration, controller selection, original error and available joint
+positions/velocities sampled before the command. These are diagnostics;
+they do not certify that the generated trajectory meets joint limits.
 
 The wrist rotates at the higher source clearance before lowering, and the
 executor rejects substantial rotations below transit height. This software

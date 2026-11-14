@@ -20,8 +20,8 @@ def main(argv=None):
     parser.add_argument('--patterns',nargs='+',choices=PATTERNS,default=list(PATTERNS))
     parser.add_argument('--final-reset',action='store_true')
     parser.add_argument('--test-transfer',action='store_true',help='One staged block to the first target cell and back')
-    parser.add_argument('--speed-scale',type=float,choices=(1.,2.),default=1.,
-                        help='Arm-motion speed relative to calibration.json: 1=unchanged, 2=double (explicit opt-in)')
+    parser.add_argument('--speed-scale',type=float,choices=(.5,1.,2.),default=1.,
+                        help='Arm-motion speed relative to calibration.json: 0.5=half, 1=unchanged, 2=double')
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument('--execute',action='store_true',help='Connect to FrankaPy and command the physical robot')
     mode.add_argument('--read-pose',action='store_true',help='Connect and print current tool pose; send no motion commands')
@@ -32,10 +32,12 @@ def main(argv=None):
         from frankapy import FrankaArm
         arm = FrankaArm(robot_num=config['robot_num'])
         pose = arm.get_pose()
+        joint_state = FrankaPyBackend(config,arm=arm).joint_diagnostics()
         print(json.dumps({'translation_m':pose.translation.tolist(),'rotation_matrix':pose.rotation.tolist(),
                           'quaternion_wxyz':pose.quaternion.tolist(),
                           'gripper_width_m':float(arm.get_gripper_width()),
-                          'ee_force_torque':arm.get_ee_force_torque().tolist()},indent=2))
+                          'ee_force_torque':arm.get_ee_force_torque().tolist(),
+                          'joint_state':joint_state},indent=2))
         return 0
     # Keep the measured configuration file intact. Scaling all three speed
     # terms and the minimum duration divides every requested arm duration by

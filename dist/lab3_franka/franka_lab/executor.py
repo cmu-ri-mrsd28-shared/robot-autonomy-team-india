@@ -26,7 +26,8 @@ class Executor:
         return {'phase':self.phase,'current_step':self.current_step,
                 'completed_transfers':len(self.transfers),'total_transfers':self.total_transfers,
                 'nominal_locations':dict(self.locations),'held_block':self.held_block,
-                'state_uncertain':self.state_uncertain,'motion_target':self.motion_target}
+                'state_uncertain':self.state_uncertain,'motion_target':self.motion_target,
+                'last_motion':getattr(self.backend,'last_motion',None)}
 
     def publish(self, **extra):
         if self.progress:
