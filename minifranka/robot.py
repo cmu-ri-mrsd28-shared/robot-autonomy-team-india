@@ -128,7 +128,7 @@ class Robot:
             )
         current = self.arm.get_pose()
         z = max(z, current.translation[2])
-        self._check_grip(False)
+        self._grip(False)
         self._move([*current.translation[:2], z], current.rotation)
         self._move([*pre_source[:2], z], current.rotation)
         self._move([*pre_source[:2], z], pick)
