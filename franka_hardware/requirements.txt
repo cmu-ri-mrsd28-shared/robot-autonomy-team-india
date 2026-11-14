@@ -1,0 +1,2 @@
+# Dry runs and local tests. Hardware uses the course's existing FrankaPy/ROS environment.
+numpy>=1.19

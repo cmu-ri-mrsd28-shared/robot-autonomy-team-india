@@ -1,0 +1,12 @@
+{
+  "grid_center": [0.50, 0.0],
+  "grid_spacing": 0.05,
+  "block_half_size": 0.02,
+  "block_mass": 0.04,
+  "staging_x": [0.35, 0.43, 0.51, 0.59],
+  "staging_y": 0.24,
+  "transfer_height": 0.22,
+  "open_finger_position": 0.027,
+  "closed_finger_position": 0.015,
+  "timestep": 0.002
+}
