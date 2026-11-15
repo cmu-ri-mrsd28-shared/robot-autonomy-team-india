@@ -112,7 +112,7 @@ def main():
     parser.add_argument('--x-offset-deg', type=float,
                         help='With --check3-grid and --x90/--x270: add this yaw in degrees; e.g. 2 gives 92/272, -2 gives 88/268')
     parser.add_argument('--joints', action='store_true',
-                        help='Use Panda IK + goto_joints for hardware checks; main.py is unchanged')
+                        help='Use Panda IK + joint moves for hardware checks; main.py is unchanged')
     args = parser.parse_args()
     if args.joints and args.check is None:
         parser.error('--joints requires a --check flag')

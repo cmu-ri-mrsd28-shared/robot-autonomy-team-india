@@ -50,11 +50,14 @@ class Grasp:
         elif axis == "Y":
             first = self._yaw(first, self.yaw_offsets["Y"])
             second = self._yaw(second, -self.yaw_offsets["Y"])
-        if reference is not None and np.trace(reference.T @ second) > np.trace(
-            reference.T @ first
-        ):
-            return second
-        return first
+        if reference is None:
+            return first
+        # Pick the nearer heading. When both are about a quarter turn away, take
+        # the second: it is on the home side of the wrist, while the first can
+        # need joint 7 beyond its limit.
+        if np.trace(reference.T @ first) > np.trace(reference.T @ second) + 0.1:
+            return first
+        return second
 
     @staticmethod
     def _yaw(rotation, degrees):

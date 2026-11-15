@@ -304,7 +304,7 @@ python3 calibration.py --check3-grid --joints
 In the team copy, `--speed 0.05` can also be supplied; otherwise set `speed`
 in config.json. Start pick/place checks with B0 in waiting, the grid empty
 and the gripper empty, as before. Check3 makes the same B0 -> top-left ->
-waiting round trip, using `goto_joints()` for every arm segment and the
+waiting round trip, using joint moves for every arm segment and the
 existing `goto_gripper()` for opening/grasping. The existing rotation tests
 and explicit X headings can also be combined with `--joints`.
 
@@ -334,13 +334,16 @@ so this diagnostic backend may run slower than the Cartesian backend. Global
 `speed` scales the joint timing, including conservative joint velocity,
 acceleration and jerk timing. SDK/controller limits remain enabled.
 
-franka-interface finishes a `goto_joints()` move once its generated position
-is within 1e-4 rad of the goal, which is before a short move has stopped
-decelerating; sub-second waypoints faulted with joint velocity/acceleration
-discontinuities for that reason. `JointMotion.duration()` therefore also
-keeps each waypoint long enough (about 4 s) that under 0.002 rad/s remains at
-that instant. This floor does not scale with `speed`, so `--joints` runs take
-roughly 8 s per descent or lift and 5-7 s per transit.
+Joint moves do not call `goto_joints()`. franka-interface finishes that skill
+once its generated position is within 1e-4 rad of the goal, which is before a
+short move has stopped decelerating; sub-second waypoints faulted with joint
+velocity/acceleration discontinuities for that reason.
+`JointHardwareRobot._start_joint_move()` builds the same FrankaPy skill
+(joint position, minimum-jerk trajectory, internal joint impedance) with the
+time-based termination handler instead, so every move runs its full duration
+plus the SDK's 0.2 s buffer. It uses FrankaPy internals (`Skill`,
+`FrankaArm._send_goal`). At speed 0.10 a descent or lift takes about 2.7 s
+and a transit 2-5 s; `speed` scales all of them.
 
 NumPy and SciPy are already listed in requirements.txt. For the joint backend
 on the lab machine, install them in its existing FrankaPy Python environment

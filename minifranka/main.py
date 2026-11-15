@@ -50,7 +50,7 @@ def main():
     parser.add_argument("--plan-only", action="store_true",
                         help="print the planned moves without moving anything")
     parser.add_argument("--joints", action="store_true",
-                        help="with --hw: use Panda IK and goto_joints instead of Cartesian commands")
+                        help="with --hw: use Panda IK and joint moves instead of Cartesian commands")
     args = parser.parse_args()
     if args.joints and not args.hw:
         parser.error("--joints requires --hw")

@@ -12,7 +12,6 @@ from robot import HardwareRobot
 class JointMotion:
     TOLERANCE = 0.003  # m, allowed tool deviation from the straight segment
     MAX_WAYPOINTS = 20
-    TERMINAL_VELOCITY = 0.002  # rad/s left when the controller ends a joint move
 
     def __init__(self, ik, speed):
         self.ik = ik
@@ -63,14 +62,10 @@ class JointMotion:
         scale = self.speed / 0.05
         # Peak derivatives of a rest-to-rest minimum-jerk trajectory are
         # 1.875*d/T, 5.774*d/T^2 and 60*d/T^3. These set timing, not rejection gates.
-        # Last term: franka-interface finishes goto_joints once the generated
-        # position is within 1e-4 rad of the goal, i.e. while still decelerating at
-        # about 30*d/T*(1e-5/d)^(2/3) rad/s. Keep that below TERMINAL_VELOCITY.
         return max(float(minimum), 0.5 / scale,
                    1.875 * distance / (0.5 * scale),
                    np.sqrt(5.774 * distance) / scale,
-                   np.cbrt(60 * distance / 5.0) / scale,
-                   30 * 1e-5 ** (2 / 3) * np.cbrt(distance) / self.TERMINAL_VELOCITY)
+                   np.cbrt(60 * distance / 5.0) / scale)
 
 
 class JointHardwareRobot(HardwareRobot):
@@ -95,10 +90,37 @@ class JointHardwareRobot(HardwareRobot):
         log(f"Joint motion: {len(waypoints)} waypoints, "
             f"planned duration={sum(seconds for _, seconds in waypoints):.1f}s")
         for i, (joints, seconds) in enumerate(waypoints, 1):
-            log(f"goto_joints {i}/{len(waypoints)}: {joints.round(5).tolist()}, {seconds:.2f}s")
-            self.arm.goto_joints(joints.tolist(), duration=float(seconds),
-                                 use_impedance=False, block=False, ignore_errors=False)
+            log(f"Joint move {i}/{len(waypoints)}: {joints.round(5).tolist()}, {seconds:.2f}s")
+            self._start_joint_move(joints.tolist(), float(seconds))
             self._wait_for_joint_motion(seconds)
+
+    def _start_joint_move(self, joints, seconds):
+        """FrankaPy's goto_joints() skill, but ending on time instead of goal proximity.
+
+        goto_joints() finishes once the generated position is within 1e-4 rad of
+        the goal, which is before a short minimum-jerk move has stopped
+        decelerating; the controller then faults. This runs the full duration.
+        """
+        from frankapy.franka_constants import FrankaConstants as FC
+        from frankapy.franka_interface_common_definitions import (
+            FeedbackControllerType, SkillType, TerminationHandlerType, TrajectoryGeneratorType)
+        from frankapy.skill_list import Skill
+
+        if not self.arm.is_joints_reachable(joints):
+            raise ValueError("Joint target is outside the joint limits")
+        if self.arm.is_joints_in_collision_with_boxes(joints):
+            raise ValueError("Joint target collides with the SDK virtual walls")
+        skill = Skill(SkillType.JointPositionSkill,
+                      TrajectoryGeneratorType.MinJerkJointTrajectoryGenerator,
+                      feedback_controller_type=FeedbackControllerType.SetInternalImpedanceFeedbackController,
+                      termination_handler_type=TerminationHandlerType.TimeTerminationHandler,
+                      skill_desc="GoToJointsTimed")
+        skill.add_initial_sensor_values(FC.EMPTY_SENSOR_VALUES)
+        skill.set_joint_impedances(False, None, None, None, None)
+        skill.add_time_termination_params(FC.DEFAULT_TERM_BUFFER_TIME)
+        skill.add_goal_joints(seconds, joints)
+        self.arm._send_goal(skill.create_goal(), cb=skill.feedback_callback,
+                            block=False, ignore_errors=False)
 
     def _wait_for_joint_motion(self, duration):
         """Wait with error propagation, matching the existing hardware backend."""

@@ -11,6 +11,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from calibration import check3_grid
+from grasp import Grasp
 from joint_motion import JointHardwareRobot, JointMotion
 from kinematics import PandaIK
 from planner import Planner
@@ -34,10 +35,10 @@ class FakeArm:
         pose = self.ik.forward(self.joints)
         return SimpleNamespace(translation=pose[:3, 3], rotation=pose[:3, :3])
 
-    def goto_joints(self, joints, **kwargs):
+    def joint_move(self, joints, seconds):
         if self.fail_next:
             raise RuntimeError("joint controller fault")
-        self.joint_calls.append((joints, kwargs))
+        self.joint_calls.append((joints, seconds))
         self.joints = np.asarray(joints)
 
     def goto_gripper(self, width, **kwargs):
@@ -66,6 +67,7 @@ def robot(ik):
     home = np.array([0, -np.pi / 4, 0, -3 * np.pi / 4, 0, np.pi / 2, np.pi / 4])
     result.arm = FakeArm(ik, home)
     result.ik, result.motion = ik, JointMotion(ik, config["speed"])
+    result._start_joint_move = result.arm.joint_move
     result._wait_for_joint_motion = Mock()
     result._wait_until_settled = Mock()
     result._cancel_motion = Mock()
@@ -106,25 +108,12 @@ def test_joint_descent_approximates_vertical_line(ik):
         previous = target
 
 
-def controller_terminal_velocity(start, end, seconds):
-    """Joint speed when franka-interface's 1e-4 rad goal test ends a min-jerk move."""
-    distance = np.abs(end - start)
-    t = np.linspace(0, 1, 20001)[:, None]
-    remaining = distance * (1 - (10 * t**3 - 15 * t**4 + 6 * t**5))
-    done = t[np.argmax(np.all(remaining <= 1e-4, axis=1)), 0]
-    return float(np.max(distance) / seconds * 30 * done**2 * (1 - done) ** 2)
-
-
-def test_waypoints_are_few_and_end_slowly(ik):
-    # The first hardware --joints move: home down to travel height. It was 15
-    # waypoints of 0.44 s, and the first one faulted as the controller finished it.
+def test_first_hardware_move_is_few_waypoints(ik):
+    # Home down to travel height was 15 sub-second waypoints, and the first faulted.
     home = np.array([0, -np.pi / 4, 0, -3 * np.pi / 4, 0, np.pi / 2, np.pi / 4])
     waypoints = JointMotion(ik, 0.1).plan([0.3069, 0, 0.2], np.diag([1, -1, -1]), home, 5.4)
     assert len(waypoints) <= 5
-    previous = home
-    for target, seconds in waypoints:
-        assert controller_terminal_velocity(previous, target, seconds) <= JointMotion.TERMINAL_VELOCITY
-        previous = target
+    assert all(seconds >= 1.0 for _, seconds in waypoints)
 
 
 def test_travel_is_one_move_and_descent_stays_straight(robot):
@@ -135,13 +124,24 @@ def test_travel_is_one_move_and_descent_stays_straight(robot):
     assert len(robot.arm.joint_calls) > 2
 
 
+def test_x_to_y_returns_to_home_side_heading(ik):
+    # Logged failure: at grid:4 in X with zero yaw offsets, both Y headings were
+    # a quarter turn away and the chosen one needed joint 7 beyond its limit.
+    config = json.loads(Path(__file__).with_name("config.json").read_text())
+    config["grasp_yaw_offsets_deg"] = {"X": 0.0, "Y": 0.0}
+    joints = np.array([0.1529, 0.08188, -0.194915, -2.330366, 0.02412, 2.411188, 2.29752])
+    pose = ik.forward(joints)
+    heading = Grasp(config).rotation("Y", pose[:3, :3])
+    np.testing.assert_allclose(heading, np.diag([1, -1, -1]), atol=1e-9)
+    assert len(JointMotion(ik, 0.1).plan(pose[:3, 3], heading, joints, 5.9, False)) == 1
+
+
 def test_check3_round_trip_uses_joints_and_existing_gripper(robot):
     check3_grid(robot)
     assert robot.locations["B0"] == "waiting:B0"
     assert robot.held_block is None
     assert len(robot.arm.joint_calls) > 0
     assert robot.arm.gripper_calls == [0.08, 0.0, 0.08, 0.08, 0.0, 0.08]
-    assert all(call[1]["block"] is False for call in robot.arm.joint_calls)
 
 
 def test_joint_fault_does_not_release_held_block(robot):
