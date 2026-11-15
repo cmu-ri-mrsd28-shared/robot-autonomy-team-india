@@ -77,15 +77,22 @@ a hardware prompt. Simulation continues automatically. Both backends inherit the
 
 ## Hardware motion and configuration
 
-The working hardware path is retained:
+The shared pickup/place sequence is:
 
 ```
 raise to travel Z -> above source XY -> orient -> descend -> grasp -> lift
 -> above destination XY -> orient -> descend -> release -> lift
 ```
 
-All hardware descent uses `grasp_height`; all XY transfer uses `travel_height`
-(currently 0.30 m). Speed is controlled by `speed` in m/s. Opening and force come
+When starting above travel height, approach XY at the current height, then
+lower to travel Z above the destination before orienting. A low starting
+pose still raises to travel Z before XY transfer. This avoids the original
+initial descent beside the base into a tightly folded arm posture. Redundant
+vertical clearance corrections within 1 mm are omitted. Pose completion
+checks remain active and this is not a full-arm collision planner.
+
+Pickup and placement descents use `grasp_height`; XY transfer uses at least
+`travel_height` (currently 0.20 m). Speed is controlled by `speed` in m/s. Opening and force come
 from `gripper.opening` and `gripper.force`. Coordinate triples stay on one line
 in `config.json`. Existing measurements are preserved.
 
@@ -264,6 +271,22 @@ If this still fails the position gate, keep the reported target, actual pose,
 joint state and controller-side termination output. Do not proceed to pickup
 or increase the allowed position error. Passing this check only validates the
 travel/orientation trial; repeat the rotate-and-place check separately.
+
+Both absolute and relative impedance travel trials returned about 21 mm
+short of the initial target despite the longer buffer. This points away
+from relative-frame conversion or merely insufficient tracking time; the
+underlying tracking cause has not been confirmed. The approach sequence now
+avoids lowering beside the base first. Compare it with an empty gripper:
+
+```bash
+python3 calibration.py --check1-travel --speed 0.05 --cartesian-impedance
+```
+
+From home, the first command should be `Move above B0` at approximately the
+current 0.487 m tool height, followed by `Lower above target to travel height`
+at B0 XY. This is a changed path, not a gain or tolerance adjustment. Stop
+and retain the first failure if the tracking error remains; no pickup test
+is justified until this check completes.
 
 Before restarting, restore B0 to waiting and ensure the gripper is empty;
 the failed trial may have left the block held at travel height. A different

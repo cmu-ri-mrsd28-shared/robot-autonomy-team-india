@@ -174,3 +174,40 @@ def test_impedance_tracking_error_still_stops_before_gripping(robot):
 
     robot._cancel_motion.assert_called_once()
     robot._grip.assert_not_called()
+
+
+def test_approach_from_home_moves_above_target_before_lowering(robot):
+    robot.arm.get_pose.return_value.translation = np.array([0.3069, 0, 0.487])
+    robot.planner.grasps.rotation.return_value = np.eye(3)
+    robot._move = Mock()
+
+    HardwareRobot.move_above(robot, 'B0', 'Y')
+
+    moves = robot._move.call_args_list
+    np.testing.assert_allclose(moves[0].args[0], [0.4, 0, 0.487])
+    np.testing.assert_allclose(moves[1].args[0], [0.4, 0, 0.3])
+    assert moves[1].kwargs['vertical'] is True
+
+
+def test_approach_from_below_clearance_raises_before_translating(robot):
+    robot.arm.get_pose.return_value.translation = np.array([0.3, 0, 0.058])
+    robot.planner.grasps.rotation.return_value = np.eye(3)
+    robot._move = Mock()
+
+    HardwareRobot.move_above(robot, 'B0', 'Y')
+
+    moves = robot._move.call_args_list
+    np.testing.assert_allclose(moves[0].args[0], [0.3, 0, 0.3])
+    assert moves[0].kwargs['vertical'] is True
+    np.testing.assert_allclose(moves[1].args[0], [0.4, 0, 0.3])
+
+
+def test_approach_at_clearance_avoids_redundant_height_command(robot):
+    robot.arm.get_pose.return_value.translation = np.array([0.3, 0, 0.300098])
+    robot.planner.grasps.rotation.return_value = np.eye(3)
+    robot._move = Mock()
+
+    HardwareRobot.move_above(robot, 'B0', 'Y')
+
+    assert len(robot._move.call_args_list) == 2  # XY approach and orientation.
+    assert all(not call.kwargs.get('vertical', False) for call in robot._move.call_args_list)

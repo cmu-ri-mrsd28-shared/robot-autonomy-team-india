@@ -91,8 +91,17 @@ class Robot:
         point = self.planner.xyz(location)
         current = self._pose()
         z = self.config["travel_height"]
-        self._move([*current.translation[:2], z], current.rotation, "Travel height", vertical=True)
-        self._move([*point[:2], z], current.rotation, "Move above " + str(location))
+        transfer_z = max(z, float(current.translation[2]))
+        # Raise before translating when low. When starting high (e.g. home),
+        # keep that height until above the destination rather than lowering
+        # beside the base into a tightly folded configuration.
+        if current.translation[2] < z - 0.001:
+            self._move([*current.translation[:2], z], current.rotation,
+                       "Raise to travel height", vertical=True)
+        self._move([*point[:2], transfer_z], current.rotation, "Move above " + str(location))
+        if transfer_z > z + 0.001:
+            self._move([*point[:2], z], self._pose().rotation,
+                       "Lower above target to travel height", vertical=True)
         # The two equivalent 180-degree headings grip the same axis. Pick the
         # one closest to the actual wrist orientation to avoid needless turns.
         rotation = self.planner.grasps.rotation(orientation, self._pose().rotation)
