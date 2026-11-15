@@ -55,10 +55,10 @@ def check2_pickone(robot):
 
 
 def check3_grid(robot):
-    """Place B0 in the top-left grid cell, then return it to waiting."""
+    """Place B0 in the empty top-left cell and return it, keeping Y throughout."""
     robot.pick("B0", "Y")
-    robot.place((0, 0), "X")
-    robot.pick("B0", "X")
+    robot.place((0, 0), "Y")
+    robot.pick("B0", "Y")
     robot.place("B0", "Y")
 
 

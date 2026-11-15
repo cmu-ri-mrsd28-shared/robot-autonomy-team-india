@@ -166,7 +166,12 @@ class Planner:
                     places = self.orientations(target, current, block)
                     if not places:
                         continue
-                    move = Move(block, source, target, picks[0], places[0])
+                    # Keep one grasp orientation for the transfer whenever possible.
+                    # Prefer Y when both ends are open; use X when clearance requires it.
+                    shared = [axis for axis in ("Y", "X") if axis in picks and axis in places]
+                    pick_axis = shared[0] if shared else ("Y" if "Y" in picks else picks[0])
+                    place_axis = pick_axis if pick_axis in places else places[0]
+                    move = Move(block, source, target, pick_axis, place_axis)
                     after = list(state)
                     after[i] = target
                     after = tuple(after)
