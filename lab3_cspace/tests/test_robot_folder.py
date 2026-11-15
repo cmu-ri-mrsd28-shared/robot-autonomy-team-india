@@ -58,6 +58,61 @@ def test_geometry_change_requires_new_joint_plans(bundle):
         module.read_plan(config,'patterns')
 
 
+def test_copied_folder_plans_without_simulator_or_parent_project(bundle,tmp_path):
+    _,dest=bundle
+    # Reject simulator, real robot and parent-project imports even if they
+    # happen to be installed in a developer's environment.
+    code='''
+import builtins,json,sys
+from pathlib import Path
+original=builtins.__import__
+def guarded(name,*args,**kwargs):
+    if name.split('.')[0] in ('mujoco','frankapy','lab3_cspace'):
+        raise AssertionError('Forbidden planning dependency: '+name)
+    return original(name,*args,**kwargs)
+builtins.__import__=guarded
+sys.path.insert(0,sys.argv[1])
+from planner.plan import build
+from planner.kinematics import load_config
+plan=build(load_config(Path(sys.argv[1])/'config.json'),'rotate-place')
+assert plan['collision_backend']=='numpy_gjk_v1'
+assert sum(a['kind']=='grip' and a['width']==0 for a in plan['actions'])==2
+print('Standalone NumPy planning passed')
+'''
+    result=subprocess.run([sys.executable,'-c',code,str(dest)],cwd=tmp_path,capture_output=True,text=True)
+    assert result.returncode==0,result.stdout+result.stderr
+    assert 'Standalone NumPy planning passed' in result.stdout
+
+
+def test_failed_replanning_never_connects_to_robot(bundle,monkeypatch):
+    module,_=bundle; factory=Mock()
+    def failed(*args): raise RuntimeError('No collision-free plan')
+    monkeypatch.setitem(sys.modules,'planner.robot_plans',SimpleNamespace(generate=failed))
+    monkeypatch.setitem(sys.modules,'frankapy',SimpleNamespace(FrankaArm=factory))
+    monkeypatch.setattr(sys,'argv',['run.py','--replan','--execute'])
+    with pytest.raises(RuntimeError,match='No collision-free plan'): module.main()
+    factory.assert_not_called()
+
+
+def test_failed_search_keeps_existing_export_unchanged(tmp_path,monkeypatch):
+    from lab3_cspace import robot_plans
+    root=Path(__file__).resolve().parents[2]
+    config=root/'lab3_cspace_robot/config.json'
+    manifest=tmp_path/'manifest.json'; manifest.write_text('old manifest')
+    plans=tmp_path/'plans'; plans.mkdir()
+    old=plans/'patterns.json'; old.write_text('old plan')
+    count=[0]
+    def fail_second(*args):
+        count[0]+=1
+        if count[0]==2: raise RuntimeError('No collision-free reset')
+        return {'unused':'first search finished'}
+    monkeypatch.setattr(robot_plans,'build',fail_second)
+    with pytest.raises(RuntimeError,match='No collision-free reset'):
+        robot_plans.generate(config,tmp_path)
+    assert manifest.read_text()=='old manifest'
+    assert old.read_text()=='old plan'
+
+
 def test_read_only_check_never_moves_or_opens_gripper(bundle,monkeypatch):
     module,dest=bundle; config=json.loads((dest/'config.json').read_text())
     arm=fake_arm(module,config)

@@ -56,6 +56,7 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--test',choices=['patterns','rotate-place'],default='patterns')
     parser.add_argument('--final-reset',action='store_true',help='Return blocks to waiting after all patterns')
+    parser.add_argument('--replan',action='store_true',help='Generate fresh joint plans from config before checking/executing (NumPy only)')
     modes=parser.add_mutually_exclusive_group()
     modes.add_argument('--state',metavar='JSON',help='Save current joints/tool pose, no motion')
     modes.add_argument('--check',action='store_true',help='Read current robot and verify the plan start/tool model, no motion')
@@ -64,12 +65,20 @@ def main():
     if args.final_reset and args.test!='patterns': parser.error('--final-reset is only for the pattern sequence')
     config=validate_config(json.loads((ROOT/'config.json').read_text()))
     if args.state:
+        if args.replan: parser.error('--replan cannot be combined with --state')
         from frankapy import FrankaArm
         state=measured_state(FrankaArm(),config)
         path=Path(args.state); path.parent.mkdir(parents=True,exist_ok=True)
         path.write_text(json.dumps(state,indent=2)+'\n')
         print(json.dumps(state,indent=2)); print('Saved state; no motion or gripper command sent')
         return
+    if args.replan:
+        if __package__:
+            from .planner.robot_plans import generate
+        else:
+            from planner.robot_plans import generate
+        generate(ROOT/'config.json',ROOT)
+        config=validate_config(json.loads((ROOT/'config.json').read_text()))
     name='patterns-reset' if args.final_reset else args.test
     plan=read_plan(config,name)
     print(f"Plan: {name}; {len(plan['actions'])} actions; nominal duration {plan['predicted_duration']:.1f}s")

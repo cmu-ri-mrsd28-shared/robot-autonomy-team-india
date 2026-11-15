@@ -17,13 +17,10 @@ def config_hash(cfg):
 
 class Builder:
     def __init__(self,cfg,start=None,seed=13):
-        from lab3_cspace.scene import Scene
+        from lab3_cspace.collision import CollisionScene
         from lab3_cspace.motion import JointPlanner
         self.cfg=cfg; self.layout=Planner(task_config(cfg)); self.robot=Panda(cfg)
-        self.scene=Scene(cfg,self.layout); self.motion=JointPlanner(self.robot,self.scene,cfg,seed)
-        # Collision-query model only: generate proximity contacts out to the
-        # configured clearance. The simulation creates its own physics model.
-        self.scene.model.geom_margin[:]=np.maximum(self.scene.model.geom_margin,cfg['motion']['clearance'])
+        self.scene=CollisionScene(cfg,self.layout); self.motion=JointPlanner(self.robot,self.scene,cfg,seed)
         self.locations=self.layout.initial_locations.copy()
         self.q=np.array(cfg['home_q'] if start is None else start,dtype=float)
         self.actions=[]; self.reports=[]
@@ -115,7 +112,7 @@ def build(cfg,test='all',final_reset=False,start=None,seed=13):
             b.reports.append({'pattern':name,'moves':len(moves),'skipped':False})
     if final_reset: b.reset()
     b.actions.append({'kind':'checkpoint','label':'final','locations':b.locations.copy()})
-    return {'schema':1,'config':cfg,'config_hash':config_hash(cfg),
+    return {'schema':1,'collision_backend':'numpy_gjk_v1','config':cfg,'config_hash':config_hash(cfg),
             'start_q':np.asarray(cfg['home_q'] if start is None else start).tolist(),
             'actions':b.actions,'reports':b.reports,'rrt_searches':b.motion.rrt_searches,
             'predicted_duration':sum(a.get('duration',1.) for a in b.actions if a['kind']!='checkpoint')}

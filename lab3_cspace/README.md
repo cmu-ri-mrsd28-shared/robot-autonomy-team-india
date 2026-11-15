@@ -57,10 +57,11 @@ search is A*, with interchangeable same-colour blocks. The pattern order is
 pickaxe, axe, box, bow. Final reset returns blocks to waiting slots of their
 colour; same-colour identities may be interchanged.
 
-The scene uses the existing Panda meshes from `../simulation/assets/`, with
+The simulation scene uses the existing Panda meshes from `../simulation/assets/`, with
 their existing licence, and explicit Lab2 shelf boxes stored in the JSON
 configuration. It does not import any previous simulation/planning controller.
-Keep that asset folder with the repo when running planning or simulation.
+Keep that asset folder with the repo when running simulation. Planning uses
+the precomputed collision vertices and needs no mesh/XML files.
 
 The simulator executes the saved joint targets and minimum-jerk interpolation.
 It never performs runtime IK, welds a cube to the gripper, snaps an object into
@@ -77,8 +78,10 @@ this is a numerical contact model, not proof of real-world grasp reliability.
   transform, analytic Jacobian, damped numerical IK, and minimum-jerk timing.
 - `task.py` / `grasp.py`: task search and exact downward X/Y grasp choices.
   There are no hidden 3- or 5-degree yaw offsets.
-- `scene.py`: MuJoCo geometry and collision queries, including robot self-contact,
-  table, shelves, other cubes, and the held cube.
+- `collision.py` / `panda_boxes.json`: NumPy geometric collision checks for
+  planning, including self-collision, table, shelves, other cubes and the held
+  cube. Oriented-box broad phase plus convex GJK; no MuJoCo dependency.
+- `scene.py`: separate MuJoCo physics model used only by the simulator.
 - `motion.py`: sampled vertical TCP approaches, IK seeded from the previous
   configuration, sampled edge collision checks, and configuration-space RRT.
 - `plan.py`: prepares the full sequence before execution and writes a JSON plan.
@@ -107,8 +110,10 @@ created.
 ## Separate robot implementation
 
 The standalone robot runtime is in [`../lab3_cspace_robot`](../lab3_cspace_robot/README.md).
-Copy only that folder to the robot PC. It contains no simulation imports,
-MuJoCo, mesh assets, or runtime IK. Arm motion uses FrankaPy `goto_joints()`.
+Copy only that folder to the robot PC. It includes a standalone NumPy planner,
+so joint plans can be generated on the robot PC before execution. It contains
+no simulation imports or MuJoCo dependency. Arm motion uses FrankaPy
+`goto_joints()`; numerical IK runs during planning, not during movement.
 
 On the planning machine, export all robot plans using the calibrated robot
 configuration:
@@ -121,7 +126,9 @@ Optional `--start-state robot_state.json` uses joints captured with the robot
 runner's `--state` command. See the robot README for calibration, read-only
 checks and execution commands. Its `config.json` is the operational hardware
 configuration; `hardware.json` here is only the original draft profile.
-Physical execution remains unverified. The former prototype hardware entry
+Planning needs only NumPy. The `requirements.txt` here also includes MuJoCo
+for simulation; it is not needed for `plan.py` or `export_robot.py`. Physical
+execution remains unverified. The former prototype hardware entry
 point in this simulation folder has been removed.
 
 ## Development checks

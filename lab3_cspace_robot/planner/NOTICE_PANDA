@@ -1,0 +1,3 @@
+Panda collision vertices derived from simulation/assets/meshes in this repository.
+The original mesh data are Apache-2.0 licensed; see LICENSE_PANDA.
+Data converted to JSON with enclosing boxes; geometry is not changed.

@@ -4,15 +4,15 @@
   "plans": {
     "patterns": {
       "file": "plans/patterns.json",
-      "sha256": "bb93705f4dfec9d94a1950b375c25a52d3fdb3270c97851ff33064e582aeebc9"
+      "sha256": "0aee51ea6ea0d7ed6afa9bba8f4f21f2356cd9128c8d30e3b6233cae870b5f4d"
     },
     "patterns-reset": {
       "file": "plans/patterns-reset.json",
-      "sha256": "e505656fffe29664ce0a552373821a500e18c34cd484d5e10704699bd16b66c9"
+      "sha256": "9ec787efc52e551591a32717518fb1a55f5533261383fd428d3183c599b53a79"
     },
     "rotate-place": {
       "file": "plans/rotate-place.json",
-      "sha256": "29ebe66a8e3e9f2a6a338209171d738c1ff5831570e93619e43a6a2353a8b3f9"
+      "sha256": "f667026cbc22f9c1e406ec7402e25aad8a6f3089e0d42e50613f99f969598170"
     }
   }
 }
