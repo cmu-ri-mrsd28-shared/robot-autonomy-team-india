@@ -1,10 +1,10 @@
-"""Run lab3 in simulation; --hw selects the physical Franka."""
+"""Simulation by default; --hw runs FrankaPy and pauses between patterns."""
 
 import argparse
 import json
 from pathlib import Path
-from planner import INITIAL, PATTERNS, Planner
-from robot import Robot
+from planner import Pattern, Planner
+from robot import Robot, HardwareRobot
 
 
 def main():
@@ -13,28 +13,11 @@ def main():
     args = parser.parse_args()
     config = json.loads(Path(__file__).with_name("config.json").read_text())
     planner = Planner(config)
-    locations = INITIAL
-    actions = []
-    for pattern in PATTERNS:
-        result = planner.plan(pattern, locations)
-        if result is None:
-            print(
-                f"Skip {pattern}: no plan for the configured grasp clearances",
-                flush=True,
-            )
-            continue
-        locations, moves = result
-        print(
-            f"{pattern}: {len(moves)} moves, including any reset from the previous pattern",
-            flush=True,
-        )
-        actions.extend(moves)
-    if not actions:
-        return
-    robot = Robot(config, planner, hw=args.hw)
+    robot = HardwareRobot(config, planner) if args.hw else Robot(config, planner)
     try:
-        for move in actions:
-            robot.pick_place(move)
+        for name, pattern in Pattern().get().items():
+            if robot.run_pattern(name, pattern) is False:
+                break
     finally:
         robot.close()
 

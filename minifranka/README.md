@@ -1,67 +1,138 @@
-# Lab 3
-
-Run the simulation (Linux):
+# Lab 3: patterns, top grasps, pick/place
 
 ```bash
-python3 main.py
+python3 main.py       # simulation on Linux
+mjpython main.py      # simulation on macOS
+python3 main.py --hw  # hardware, with an input pause between patterns
 ```
 
-On macOS, use `mjpython main.py` for MuJoCo's viewer.
+## Parts
 
-Run the physical robot in the lab's existing FrankaPy environment:
+- `planner.py`: `Pattern().get()` returns all four patterns;
+  `Pattern().get('box')` returns one 3x3 array. No global pattern data.
+- `grasp.py`: `Grasp` considers only downward grasps closing along X or Y.
+- `planner.py`: `Planner.plan(pattern, locations)` plans a transition from the
+  current arrangement. Blocks already in suitable cells can stay there.
+- `robot.py`: `Robot` runs simulation. `HardwareRobot(Robot)` runs FrankaPy.
+- `simulation/`: MuJoCo pose/move/grip adapter, viewer and contact physics.
 
-```bash
-python3 main.py --hw
+`Robot` has four movement operations:
+
+```python
+robot.move_above("B0", "Y")  # travel height, above a waiting location
+robot.pick("B0", "Y")  # pick this block from its current location
+robot.place((0, 0), "X")  # place the held block at grid row 0, column 0
+robot.pick_place(move)  # execute one instruction returned by Planner
 ```
 
-There are no other run modes. The four assignment patterns are attempted in
-order. The planner includes reset moves between patterns; the final pattern
-is left in place. The initial grid must be empty and all boxes at their
-configured starting locations. Hardware starts with an empty, open gripper.
+`pick` and `place` include the approach and lift. `move_above` can be exercised
+on its own. On hardware these methods command actual movement.
 
-## Files
+Example setup for calling them individually:
 
-- `config.json`: box/grid positions and a few motion/gripper settings.
-- `planner.py`: your previous lab3 placement/removal search wrapped in `Planner`,
-  with top and side approach-clearance checks.
-- `robot.py`: `Robot.pick_place()` selects simulation or FrankaPy.
-- `main.py`: plans the sequence and runs it.
-- `simulation/`: your previous lab3 MuJoCo scene, IK/RRT and physics executor.
-  These reuse the sibling `lab2` model, meshes and kinematics as before.
+```python
+import json
+from planner import Planner
+from robot import Robot, HardwareRobot
 
-The previous teammate-style replacement is not used or imported.
+config = json.load(open("config.json"))
+planner = Planner(config)
+robot = Robot(config, planner)  # use HardwareRobot(config, planner) on the lab PC
+```
 
-## Configuration
+## Patterns and transitions
 
-The example grid and box coordinates come from your original lab3 layout:
-40 mm cubes, 58 mm grid spacing, staging at y=+/-0.23 and x=0.35/0.44/0.53/0.62.
-They are not measurements of your lab setup. All positions are meters in the
-robot base frame. `boxes` and the grid center refer to **cube centers**.
+```python
+from planner import Pattern
 
-`tool_to_grasp` is deliberately `null`: no end-effector calibration is invented.
-Simulation uses the original lab2 TCP transform. For hardware, measure the
-vector from your configured FrankaPy tool frame to the pinch center, expressed
-in tool coordinates, and replace null with that XYZ vector. The tool target is
-`box_center - rotation @ tool_to_grasp`. If the tool frame already is the pinch
-center, the measured offset can be `[0, 0, 0]`.
+robot.run_pattern("pickaxe", Pattern().get("pickaxe"))
+robot.run_pattern("box", Pattern().get("box"))
+```
 
-`travel_height` is absolute hardware tool Z, not a downward distance. Hardware
-requires it to be at least 10 cm above pick and place tool targets. `workspace`
-is the lower/upper XYZ limit on tool commands. `gripper.opening` is full jaw
-width in meters; grasping requests zero width with `gripper.force` N and checks
-that the jaws stop at the box width. `speed` is translational speed in m/s.
+`robot.locations` remembers each block, for example:
 
-Top grasps close along x or y. Side grasps approach from +/-x or +/-y and check
-an approach lane, finger space, palm space and table clearance. The gripper
-clearance dimensions retain the original lab3 finger model, extended with an
-approximate Panda palm. Low tabletop side grasps can be rejected because the
-hand would hit the table; they are not a universal escape from blocked top
-grasps. The planner searches monotone constructions, not arbitrary temporary
-rearrangements. It skips targets with no plan under that model.
+```python
+{'R0': 'grid:4', 'R1': 'waiting:R1', ...}
+```
 
-Simulation checks full mesh collisions and runs contact-based grasp physics.
-Hardware uses Cartesian FrankaPy moves with workspace, pose and jaw feedback;
-it does not run the MuJoCo arm planner or measure actual block positions. A
-successful simulation therefore does not establish physical calibration or
-clearance. On hardware failure, the skill is stopped without releasing a held
-box. Reconcile box positions before restarting.
+During a pick it records `'held'`; after placement it records the destination.
+Locations are nominal software bookkeeping, not camera measurements. They
+persist across patterns in the current run. Starting a new Robot object assumes
+all blocks are back in their configured waiting positions.
+
+The planner combines transfers between grid cells, additions from waiting and
+removals to waiting. It does not reset the entire arrangement between patterns.
+Waiting slots of the same color may hold different individual blocks; the
+location dictionary records which block actually occupies each slot.
+
+The planner checks feasibility before moving. Under the intended crowded-grid
+model, axe's filled 2x2 group has no possible last insertion and is skipped.
+Pickaxe, box and bow are feasible. In the current configuration the planner
+uses 5 moves to construct pickaxe, 5 to transition to box, and 5 to transition
+to bow. Move counts can change with configuration or starting arrangement.
+
+Hardware pauses before the next feasible pattern, after showing its move count.
+Press Enter to continue or `q` to finish. Infeasible patterns are skipped without
+a hardware prompt. Simulation continues automatically. Both backends inherit the same move_above, pick and place routines.
+
+## Hardware motion and configuration
+
+The working hardware path is retained:
+
+```
+raise to travel Z -> above source XY -> orient -> descend -> grasp -> lift
+-> above destination XY -> orient -> descend -> release -> lift
+```
+
+All hardware descent uses `grasp_height`; all XY transfer uses `travel_height`
+(currently 0.30 m). Speed is controlled by `speed` in m/s. Opening and force come
+from `gripper.opening` and `gripper.force`. Coordinate triples stay on one line
+in `config.json`. Existing measurements are preserved.
+
+X/Y means the direction the jaws close in the table plane. Both grasps point
+straight down. Hardware chooses the closer equivalent wrist heading, avoiding
+unnecessary 180-degree turns. Orientation changes happen at travel height.
+There are no side grasps, application pose-error rejection gates, custom
+workspace/travel rejection gates, or custom jaw-width rejection gates.
+FrankaPy/controller error reporting remains enabled.
+
+Waiting and grid X/Y coordinates come from the config. Hardware uses them as
+taught tool targets and ignores individual Z values in favor of `grasp_height`.
+Simulation derives
+cube-center Z as `table_height + box_width/2`, so taught tool heights do not
+make simulated boxes float above the table. Simulation requires the existing
+lab2 folder/model assets, discovered from a sibling lab2 or an ancestor's labs/lab2.
+
+Grasp clearance uses the original approximate finger footprint, including the
+previously requested 10 mm overlap allowance. It is a task-level model;
+hardware does not run full-arm collision planning or measure block placement.
+MuJoCo handles physical contacts. Its adapter uses numerical joint control for Cartesian commands; there is no separate simulation task planner, RRT or pick/place routine.
+
+## Speed and editing
+
+Arrays in `config.json` stay on one line, including each R0–B3 XYZ triple.
+The unused `tool_to_grasp`, `approach_distance` and `workspace` keys are removed.
+
+`speed` remains a translational speed in m/s: 0.05 is 5 cm/s. It controls all
+hardware arm moves and calibration moves. Doubling it halves translation,
+rotation and minimum arm-motion durations. Simulation receives exactly the same arm-motion durations as hardware; its physics
+timestep is unchanged. Jaw-operation speed, force, grasp settling time and
+user-input pauses do not scale.
+
+With the tool at the desired gripping height, `python3 calibration.py --grasp`
+reads and prints `grasp_height`. It does not move the robot or write the config.
+
+## Shared execution
+
+`main.py` constructs one Planner. Robot.move_above(), pick(), place() and
+pick_place() are shared by simulation and HardwareRobot through inheritance.
+The hardware subclass only supplies tool-pose feedback, Cartesian movement,
+gripper commands and the requested inter-pattern prompt.
+
+The simulator implements the corresponding pose/move/grip interface. It does
+not instantiate another Planner or generate its own pick/place trajectories.
+It interpolates the same Cartesian commands and converts them to joint targets
+for the MuJoCo actuators, analogous to FrankaPy's low-level Cartesian interface.
+Physics advances normally; blocks are neither attached nor snapped to targets.
+The simulated reported tool frame is aligned with grasp_height so both modes
+use the same two tool heights. Cube centers rest at table_height + box_width/2.
