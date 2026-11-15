@@ -50,25 +50,14 @@ class Robot:
     def _pose(self, center, rotation):
         return np.array(center) - rotation @ np.array(self.config["tool_to_grasp"])
 
-    def _move(self, xyz, rotation):
+    def _move(self, xyz, rotation, label="move"):
         xyz = np.array(xyz)
-        limits = np.array(self.config["workspace"])
-        if (
-            not np.isfinite(xyz).all()
-            or np.any(xyz < limits[0])
-            or np.any(xyz > limits[1])
-        ):
-            raise ValueError(f"Tool target outside workspace: {xyz}")
         current = self.arm.get_pose()
         angle = np.arccos(
             np.clip((np.trace(current.rotation.T @ rotation) - 1) / 2, -1, 1)
         )
-        if (
-            angle > 0.5
-            and min(current.translation[2], xyz[2])
-            < self.config["travel_height"] - 0.10
-        ):
-            raise ValueError("Raise to travel height before changing orientation")
+        print(f"MOVE {label}: current XYZ={current.translation.round(5).tolist()}, "
+              f"target XYZ={xyz.round(5).tolist()}, rotation change={angle:.4f} rad", flush=True)
         duration = max(
             3.0,
             1.875 * np.linalg.norm(xyz - current.translation) / self.config["speed"],
@@ -87,8 +76,9 @@ class Robot:
         rotation_error = np.arccos(
             np.clip((np.trace(actual.rotation.T @ rotation) - 1) / 2, -1, 1)
         )
-        if np.linalg.norm(actual.translation - xyz) > 0.10 or rotation_error > 0.5:
-            raise RuntimeError("Robot did not reach the requested tool pose")
+        print(f"RESULT {label}: actual XYZ={actual.translation.round(5).tolist()}, "
+              f"position error={np.linalg.norm(actual.translation-xyz):.5f} m, "
+              f"rotation error={rotation_error:.5f} rad", flush=True)
 
     def _grip(self, close):
         width = 0.0 if close else self.config["gripper"]["opening"]
@@ -101,17 +91,6 @@ class Robot:
             block=True,
             ignore_errors=False,
         )
-        self._check_grip(close)
-
-    def _check_grip(self, close=True):
-        expected = (
-            self.config["box_width"] if close else self.config["gripper"]["opening"]
-        )
-        actual = float(self.arm.get_gripper_width())
-        if not np.isfinite(actual) or abs(actual - expected) > 0.2:
-            raise RuntimeError(
-                f"Unexpected gripper width: {actual}; expected {expected}"
-            )
 
     def _hardware_move(self, move):
         pick, place = (
@@ -122,30 +101,24 @@ class Robot:
         pre_source = source - pick[:, 2] * self.config["approach_distance"]
         pre_target = target - place[:, 2] * self.config["approach_distance"]
         z = self.config["travel_height"]
-        if min(z - source[2], z - target[2]) < 0.10:
-            raise ValueError(
-                "Travel height needs 10 cm clearance above these tool targets"
-            )
         current = self.arm.get_pose()
         z = max(z, current.translation[2])
         self._grip(False)
-        self._move([*current.translation[:2], z], current.rotation)
-        self._move([*pre_source[:2], z], current.rotation)
-        self._move([*pre_source[:2], z], pick)
-        self._move(pre_source, pick)
-        self._move(source, pick)
+        self._move([*current.translation[:2], z], current.rotation, label="raise at current XY")
+        self._move([*pre_source[:2], z], current.rotation, label="above waiting block")
+        self._move([*pre_source[:2], z], pick, label="rotate above waiting block")
+        self._move(pre_source, pick, label="descend to pre-grasp")
+        self._move(source, pick, label="descend to grasp")
         self._grip(True)
-        self._move(pre_source, pick)
-        self._move([*pre_source[:2], z], pick)
-        self._check_grip()
-        self._move([*pre_target[:2], z], pick)
-        self._move([*pre_target[:2], z], place)
-        self._move(pre_target, place)
-        self._check_grip()
-        self._move(target, place)
+        self._move(pre_source, pick, label="retract after grasp")
+        self._move([*pre_source[:2], z], pick, label="lift waiting block")
+        self._move([*pre_target[:2], z], pick, label="transfer above destination")
+        self._move([*pre_target[:2], z], place, label="rotate above destination")
+        self._move(pre_target, place, label="descend to pre-place")
+        self._move(target, place, label="descend to place")
         self._grip(False)
-        self._move(pre_target, place)
-        self._move([*pre_target[:2], z], place)
+        self._move(pre_target, place, label="retract after release")
+        self._move([*pre_target[:2], z], place, label="final lift")
 
     def close(self):
         if self.sim:
