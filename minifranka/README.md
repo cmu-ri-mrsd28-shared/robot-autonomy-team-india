@@ -220,9 +220,10 @@ python3 calibration.py --check3-grid --x90    # Fixed X heading +90 degrees from
 python3 calibration.py --check3-grid --x270   # Fixed X heading -90 degrees from canonical Y
 ```
 
-For these two X checks, B0 is picked and returned at waiting using the same fixed
-downward Y pose (Y0). Placement and pickup at the top-left cell both use the
-selected fixed X pose. Angles are about robot-base +Z relative to Y0, positive
+For these two X checks, waiting-area pickup and return use the normal Y
+orientation selection, exactly as in the default check3. Only placement and
+pickup at the top-left cell use the selected fixed X pose. Angles are about
+robot-base +Z relative to the canonical downward Y reference (Y0), positive
 by the right-hand rule; they are target headings, not joint angles or a command
 to rotate through 270 degrees. X90 and X270 differ by 180 degrees and both close
 the jaws along X. Automatic nearest-heading selection is disabled for these
@@ -230,3 +231,17 @@ explicit poses. Each command still completes the full round trip, so an X
 descent is attempted twice (placement, then pickup). Begin each run with B0 in
 waiting, the grid empty and the gripper empty. The hardware settling checks and stop-on-first-fault behavior described above
 also apply to these trials. These flags apply only to check3; main.py is unchanged.
+
+To test a small yaw offset from either X heading:
+
+```bash
+python3 calibration.py --check3-grid --x90 --x-offset-deg 2    # 92 degrees
+python3 calibration.py --check3-grid --x270 --x-offset-deg 2   # 272 degrees
+```
+
+The signed offset is about base +Z; use `--x-offset-deg -2` for 88 or 268
+degrees. The tool remains pointed down, but the jaws are now 2 degrees off
+the exact X axis. The offset applies only to the grid placement/pickup in
+these explicit-heading calibration checks; waiting pickup stays normal Y.
+The default offset is zero. No config is written and main.py is unchanged.
+This is a diagnostic variation, not a confirmed fix for the controller fault.

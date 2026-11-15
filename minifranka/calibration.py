@@ -54,16 +54,18 @@ def check2_pickone(robot):
     robot.place("B0", "Y")
 
 
-def check3_grid(robot, grid_orientation="Y"):
-    """Round trip via top-left; optionally test an exact downward X heading."""
-    waiting_orientation = "Y" if grid_orientation == "Y" else "Y0"
+def check3_grid(robot, grid_orientation="Y", x_offset_deg=0.0):
+    """Round trip via top-left; optionally test a fixed X heading with yaw offset."""
+    robot.planner.grasps.x_yaw_offset_deg = x_offset_deg
     if grid_orientation != "Y":
-        log(f"Testing {grid_orientation}: fixed heading about base +Z relative to canonical "
-            "downward Y; waiting uses fixed Y0, grid uses the selected X heading")
-    robot.pick("B0", waiting_orientation)
+        heading = (90 if grid_orientation == "X90" else 270) + x_offset_deg
+        log(f"Testing {grid_orientation} with offset {x_offset_deg:+g} degrees: "
+            f"target heading {heading:g} degrees about base +Z from canonical downward Y; "
+            "waiting uses normal Y")
+    robot.pick("B0", "Y")
     robot.place((0, 0), grid_orientation)
     robot.pick("B0", grid_orientation)
-    robot.place("B0", waiting_orientation)
+    robot.place("B0", "Y")
 
 
 def check3_grid_rotate(robot):
@@ -95,7 +97,14 @@ def main():
                          help='With --check3-grid: fixed downward X heading, +90 degrees about base +Z from canonical Y')
     heading.add_argument('--x270', dest='grid_orientation', action='store_const', const='X270',
                          help='With --check3-grid: fixed downward X heading, +270 degrees (-90) about base +Z from canonical Y')
+    parser.add_argument('--x-offset-deg', type=float,
+                        help='With --check3-grid and --x90/--x270: add this yaw in degrees; e.g. 2 gives 92/272, -2 gives 88/268')
     args = parser.parse_args()
+    if args.x_offset_deg is not None:
+        if args.grid_orientation is None:
+            parser.error('--x-offset-deg requires --x90 or --x270')
+        if not np.isfinite(args.x_offset_deg):
+            parser.error('--x-offset-deg must be finite')
     if args.grid_orientation is not None and args.check is not check3_grid:
         parser.error('--x90 and --x270 require --check3-grid')
     if args.speed is not None and (not np.isfinite(args.speed) or args.speed <= 0):
@@ -116,7 +125,7 @@ def main():
         robot = HardwareRobot(config, Planner(config))
         try:
             if args.check is check3_grid:
-                check3_grid(robot, args.grid_orientation or "Y")
+                check3_grid(robot, args.grid_orientation or "Y", args.x_offset_deg or 0.0)
             else:
                 args.check(robot)
         finally:
