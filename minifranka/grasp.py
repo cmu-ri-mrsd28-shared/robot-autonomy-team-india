@@ -5,6 +5,10 @@ import numpy as np
 
 class Grasp:
     def __init__(self, config):
+        offsets = config.get("grasp_yaw_offsets_deg", {})
+        self.yaw_offsets = {"X": float(offsets.get("X", 3.0)), "Y": float(offsets.get("Y", 0.0))}
+        if not np.isfinite(list(self.yaw_offsets.values())).all():
+            raise ValueError("grasp_yaw_offsets_deg must contain finite degrees")
         self.x_yaw_offset_deg = 0.0  # Calibration-only offset for explicit X90/X270.
         self.half_box = config["box_width"] / 2
         # The original lab3 finger footprint, with the requested 10 mm allowance.
@@ -37,14 +41,24 @@ class Grasp:
         second = first @ np.diag([-1.0, -1.0, 1.0])
         if axis in ("X90", "X270"):
             target = second if axis == "X90" else first
-            angle = np.deg2rad(self.x_yaw_offset_deg)
-            c, s = np.cos(angle), np.sin(angle)
-            yaw = np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
-            return yaw @ target  # Base-frame yaw offset; tool Z stays downward.
+            return self._yaw(target, self.x_yaw_offset_deg)
         if axis == "Y0":
             return first
+        if axis == "X":
+            first = self._yaw(first, -self.yaw_offsets["X"])
+            second = self._yaw(second, self.yaw_offsets["X"])
+        elif axis == "Y":
+            first = self._yaw(first, self.yaw_offsets["Y"])
+            second = self._yaw(second, -self.yaw_offsets["Y"])
         if reference is not None and np.trace(reference.T @ second) > np.trace(
             reference.T @ first
         ):
             return second
         return first
+
+    @staticmethod
+    def _yaw(rotation, degrees):
+        """Apply yaw about base +Z, keeping a downward tool pointed down."""
+        angle = np.deg2rad(degrees)
+        c, s = np.cos(angle), np.sin(angle)
+        return np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]]) @ rotation

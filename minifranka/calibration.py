@@ -81,6 +81,16 @@ def check4_pattern(robot):
     robot.run_pattern("pickaxe", Pattern().get("pickaxe"))
 
 
+def check5_x_to_y(robot):
+    """Reproduce grid X -> travel above B2 -> Y, without descending or gripping."""
+    grasps = robot.planner.grasps
+    grasps.x_yaw_offset_deg = grasps.yaw_offsets["X"]
+    log(f"X-to-Y check: grid heading {90 + grasps.yaw_offsets['X']:g} degrees; "
+        f"normal Y offset {grasps.yaw_offsets['Y']:+g} degrees; no descent or gripper commands")
+    robot.move_above((0, 0), "X90")
+    robot.move_above("B2", "Y")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group()
@@ -91,6 +101,8 @@ def main():
     mode.add_argument('--check3-grid', dest='check', action='store_const', const=check3_grid, help='B0 to top-left grid cell and back to waiting')
     mode.add_argument('--check3-grid-rotate', dest='check', action='store_const', const=check3_grid_rotate, help='B0 Y pickup, X placement at top-left cell, then return; stop on first fault')
     mode.add_argument('--check4-pattern', dest='check', action='store_const', const=check4_pattern, help='Build pickaxe; leave the pattern in the grid')
+    mode.add_argument('--check5-x-to-y', dest='check', action='store_const', const=check5_x_to_y,
+                      help='At travel height: grid X heading, then travel to B2 and rotate to Y; no grasp')
     parser.add_argument('--speed', type=float, help='Override arm speed in m/s for this run; config.json is not edited')
     parser.add_argument('--relative-z', action='store_true',
                         help='Use translation-only goto_pose_delta for vertical travel, descents and lifts')
