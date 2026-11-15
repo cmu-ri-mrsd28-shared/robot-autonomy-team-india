@@ -92,9 +92,10 @@ in `config.json`. Existing measurements are preserved.
 X/Y means the direction the jaws close in the table plane. Both grasps point
 straight down. Hardware chooses the closer equivalent wrist heading, avoiding
 unnecessary 180-degree turns. Orientation changes happen at travel height.
-There are no side grasps, application pose-error rejection gates, custom
-workspace/travel rejection gates, or custom jaw-width rejection gates.
-FrankaPy/controller error reporting remains enabled.
+There are no side grasps, custom workspace/travel rejection gates, or custom
+jaw-width rejection gates. Hardware now rejects returned moves with position
+error above 5 mm or rotation error above 0.03 rad. FrankaPy/controller error
+reporting remains enabled.
 
 Waiting and grid X/Y coordinates come from the config. Hardware uses them as
 taught tool targets and ignores individual Z values in favor of `grasp_height`.
@@ -126,8 +127,8 @@ reads and prints `grasp_height`. It does not move the robot or write the config.
 
 `main.py` constructs one Planner. Robot.move_above(), pick(), place() and
 pick_place() are shared by simulation and HardwareRobot through inheritance.
-The hardware subclass only supplies tool-pose feedback, Cartesian movement,
-gripper commands and the requested inter-pattern prompt.
+The hardware subclass supplies feedback, Cartesian movement, gripper commands,
+motion completion/settling checks, and the inter-pattern prompt.
 
 The simulator implements the corresponding pose/move/grip interface. It does
 not instantiate another Planner or generate its own pick/place trajectories.
@@ -147,6 +148,7 @@ These commands operate the physical robot.
 python3 calibration.py --check1-travel   # Above B0; try Y and X, without descending
 python3 calibration.py --check2-pickone  # Pick B0 and return it to waiting
 python3 calibration.py --check3-grid     # B0 to top-left grid cell and back
+python3 calibration.py --check3-grid-rotate --speed 0.05  # Same trip with Y -> X rotation
 python3 calibration.py --check4-pattern  # Build pickaxe; leave it on the grid
 ```
 
@@ -164,13 +166,48 @@ python3 calibration.py --move B0        # Move to B0 XY at the common grasp heig
 
 `--grasp` prints the height for you to copy into JSON; it does not edit the file.
 
+## Test rotation followed by descent
+
+Start with B0 in its calibrated waiting position, the grid empty and the
+gripper empty. From `minifranka`, run the Y-only baseline, then the rotation
+test after the baseline successfully returns B0:
+
+```bash
+python3 calibration.py --check3-grid --speed 0.05
+python3 calibration.py --check3-grid-rotate --speed 0.05
+```
+
+Run these commands individually. `--speed` overrides the speed only for that
+run; calibrated coordinates and config.json are unchanged. The rotation test
+picks B0 with Y, rotates to X above grid cell 0, places it, then picks with X
+and returns it to waiting with Y.
+
+After each top-grasp orientation command and before every descent, hardware
+requires all seven measured joint velocities to remain at or below 0.01 rad/s
+for 0.5 seconds. It polls at 20 Hz and stops if this does not happen within
+5 seconds. These diagnostic thresholds are not controller limit settings.
+Logs include `SETTLING`, `SETTLED`, measured joint positions/velocities, actual
+tool pose and target rotation. They use FrankaPy's measured-state APIs; they
+do not capture the controller's internal desired trajectory or establish
+that its IK path is valid.
+
+On a motion fault, the program attempts bounded cancellation and stops without
+retrying, taking a detour, opening the gripper, or returning home. The block
+may still be held. Restore the physical starting arrangement before another
+run; restarting assumes B0 is back at waiting and opens the gripper first.
+Save the first fault and the preceding `STATE`/`SETTLED` lines. A settling
+timeout identifies residual measured motion; a discontinuity after `SETTLED`
+needs further investigation of the joint configuration and controller's
+trajectory handoff. A successful mock or simulation test cannot establish
+hardware success.
+
 
 ## Debugging
 
 ```
-while true;
-do;
+while true
+do
   rosservice call /get_current_franka_interface_status_server_node_1/get_current_franka_interface_status_server;
   sleep 0.2
-done;
+done
 ```

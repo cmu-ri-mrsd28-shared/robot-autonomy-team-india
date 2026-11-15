@@ -62,6 +62,14 @@ def check3_grid(robot):
     robot.place("B0", "Y")
 
 
+def check3_grid_rotate(robot):
+    """Repeat the original Y pickup -> X placement -> return experiment."""
+    robot.pick("B0", "Y")
+    robot.place((0, 0), "X")
+    robot.pick("B0", "X")
+    robot.place("B0", "Y")
+
+
 def check4_pattern(robot):
     """Run pickaxe and leave the completed pattern in the grid."""
     robot.run_pattern("pickaxe", Pattern().get("pickaxe"))
@@ -75,12 +83,18 @@ def main():
     mode.add_argument('--check1-travel', dest='check', action='store_const', const=check1_travel, help='Above B0: try Y and X orientations without descending')
     mode.add_argument('--check2-pickone', dest='check', action='store_const', const=check2_pickone, help='Pick B0 and return it to its waiting position')
     mode.add_argument('--check3-grid', dest='check', action='store_const', const=check3_grid, help='B0 to top-left grid cell and back to waiting')
+    mode.add_argument('--check3-grid-rotate', dest='check', action='store_const', const=check3_grid_rotate, help='B0 Y pickup, X placement at top-left cell, then return; stop on first fault')
     mode.add_argument('--check4-pattern', dest='check', action='store_const', const=check4_pattern, help='Build pickaxe; leave the pattern in the grid')
+    parser.add_argument('--speed', type=float, help='Override arm speed in m/s for this run; config.json is not edited')
     args = parser.parse_args()
+    if args.speed is not None and (not np.isfinite(args.speed) or args.speed <= 0):
+        parser.error('--speed must be a positive finite value in m/s')
     if not args.grasp and args.move is None and args.check is None:
         parser.print_help()
         return
     config = json.loads(Path(__file__).with_name('config.json').read_text())
+    if args.speed is not None:
+        config['speed'] = args.speed
     if args.move is not None:
         move_to_position(config, args.move)
     elif args.grasp:

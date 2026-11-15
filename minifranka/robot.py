@@ -61,7 +61,7 @@ class Robot:
         except BaseException:
             if self.arm is not None:
                 try:
-                    self.arm.stop_skill()
+                    self._cancel_motion()
                 except Exception:
                     pass
             raise
@@ -164,6 +164,12 @@ class Robot:
 
 
 class HardwareRobot(Robot):
+    # Diagnostic settling criteria, in rad/s and seconds. These are application
+    # checks, not replacements for the controller's motion limits.
+    SETTLE_VELOCITY = 0.01
+    SETTLE_WINDOW = 0.5
+    SETTLE_TIMEOUT = 5.0
+
     def __init__(self, config, planner):
         self._setup(config, planner)
         from frankapy import FrankaArm
@@ -184,63 +190,88 @@ class HardwareRobot(Robot):
         return self.arm.get_pose()
 
     def _descend(self, xyz, rotation, label):
-        # Initial descent, one slower retry, then up to three center detours.
-        for attempt in range(5):
+        self._wait_until_settled("Before " + label)
+        # One attempt only: preserve the first fault and leave the gripper alone.
+        self._move(xyz, rotation, label)
+
+    def _joint_sample(self):
+        q = np.asarray(self.arm.get_joints(), dtype=float)
+        dq = np.asarray(self.arm.get_joint_velocities(), dtype=float)
+        if q.shape != (7,) or dq.shape != (7,) or not (
+            np.isfinite(q).all() and np.isfinite(dq).all()
+        ):
+            raise RuntimeError("Invalid joint feedback; no further motion commanded")
+        return q, dq
+
+    def _log_joint_state(self, label):
+        q, dq = self._joint_sample()
+        pose = self._pose()
+        log(f"STATE {label}: q(rad)={q.round(6).tolist()}, "
+            f"dq(rad/s)={dq.round(6).tolist()}, "
+            f"XYZ={pose.translation.round(6).tolist()}, "
+            f"R={pose.rotation.round(6).tolist()}")
+
+    def _wait_until_settled(self, label):
+        started = time.monotonic()
+        quiet_since = None
+        log(f"SETTLING {label}: all |dq| <= {self.SETTLE_VELOCITY} rad/s "
+            f"for {self.SETTLE_WINDOW}s (timeout {self.SETTLE_TIMEOUT}s)")
+        while True:
+            _, dq = self._joint_sample()
+            now = time.monotonic()
+            peak = float(np.max(np.abs(dq)))
+            if now - started >= self.SETTLE_TIMEOUT:
+                raise TimeoutError(f"{label}: arm did not settle; max |dq|={peak:.6f} rad/s; "
+                                   "descent cancelled")
+            if peak <= self.SETTLE_VELOCITY:
+                if quiet_since is None:
+                    quiet_since = now
+                if now - quiet_since >= self.SETTLE_WINDOW:
+                    log(f"SETTLED {label}: max |dq|={peak:.6f} rad/s, "
+                        f"elapsed={now-started:.2f}s")
+                    self._log_joint_state(label)
+                    return
+            else:
+                quiet_since = None
+            time.sleep(0.05)
+
+    def _move(self, xyz, rotation, label, duration_scale=1.0):
+        try:
+            self._log_joint_state("BEFORE " + label)
+            log(f"TARGET {label}: R={np.asarray(rotation).round(6).tolist()}")
+            super()._move(xyz, rotation, label, duration_scale)
+            actual = self._pose()
+            position_error = float(np.linalg.norm(actual.translation - np.asarray(xyz)))
+            angle_error = float(np.arccos(np.clip(
+                (np.trace(actual.rotation.T @ rotation) - 1) / 2, -1, 1)))
+            if (not np.isfinite([position_error, angle_error]).all()
+                    or position_error > 0.005 or angle_error > 0.03):
+                raise RuntimeError(f"{label}: target not reached "
+                                   f"(position error={position_error:.5f} m, "
+                                   f"rotation error={angle_error:.5f} rad)")
+            self._log_joint_state("AFTER " + label)
+            if label.startswith("Top grasp "):
+                self._wait_until_settled("After " + label)
+        except BaseException:
+            # Diagnostic reads/cancellation must never replace the original fault.
             try:
-                if attempt >= 2:
-                    self._reposition_for_descent(xyz, rotation)
-                self._move(xyz, rotation, label, duration_scale=1.0 if attempt == 0 else 2.0)
-                actual_z = self._pose().translation[2]
-                if abs(actual_z - xyz[2]) > 0.01:
-                    raise RuntimeError(
-                        f"{label} did not reach grasp height: Z={actual_z:.5f}, "
-                        f"target={xyz[2]:.5f}; gripper command cancelled"
-                    )
-                return
+                self._log_joint_state("FAILED " + label)
             except Exception as error:
-                if attempt == 4 or not self._retryable_motion_error(error):
-                    log(f"Z failure during {label}: stopping without a gripper command; {error}")
-                    raise
-                action = "retry descent at half speed" if attempt == 0 else (
-                    f"center detour {attempt}/3, then retry descent at half speed"
-                )
-                log(f"Retrying because of Z failure during {label}: {action}; "
-                    f"cancelling the current motion and waiting for recovery. Reason: {error}")
-                self._recover_motion()
+                log(f"Could not read failure state: {error}")
+            try:
+                self._cancel_motion()
+            except Exception as error:
+                log(f"Motion cancellation failed: {error}")
+            log(f"STOPPED {label}: no automatic retry, detour, or gripper command")
+            raise
 
-    @staticmethod
-    def _retryable_motion_error(error):
-        message = str(error).lower()
-        jerk_reflex = '["cartesian_motion_generator_joint_acceleration_discontinuity"]'
-        return (isinstance(error, TimeoutError) or jerk_reflex in message
-                or ("motion finished commanded" in message and "still moving" in message))
-
-    def _recover_motion(self):
-        """Cancel this client's motion, wait for it to end, then await recovery."""
+    def _cancel_motion(self):
+        """Bounded cancellation only; never recover and launch another motion."""
         import rospy
 
-        # Avoid stop_skill(): its internal wait can suppress errors and wait indefinitely.
         self.arm._client.cancel_goal()
         if not self.arm._client.wait_for_result(rospy.Duration.from_sec(10.0)):
-            raise RuntimeError("Motion cancellation did not finish within 10 seconds; no retry sent")
-        # franka-interface owns libfranka and performs automaticErrorRecovery.
-        self.arm.wait_for_franka_interface(timeout=10.0)
-        # The action is now terminal and the interface ready; clear SDK skill bookkeeping.
-        if not self.arm.is_skill_done(ignore_errors=False):
-            raise RuntimeError("Previous motion is still active; no retry sent")
-
-    def _reposition_for_descent(self, xyz, rotation):
-        """Return through grid center at travel height, keeping the held block."""
-        z = self.config["travel_height"]
-        current = self._pose()
-        center = self.config["grid"]["center"]
-        if abs(current.translation[2] - z) > 0.001:
-            self._move([*current.translation[:2], z], rotation,
-                       "Z recovery: rise to travel height", duration_scale=2.0)
-        self._move([*center[:2], z], rotation,
-                   "Z recovery: move to grid center", duration_scale=2.0)
-        self._move([*xyz[:2], z], rotation,
-                   "Z recovery: return above descent target", duration_scale=2.0)
+            raise RuntimeError("Motion cancellation did not finish within 10 seconds")
 
     def _send_move(self, xyz, rotation, duration):
         pose = self.transform(
