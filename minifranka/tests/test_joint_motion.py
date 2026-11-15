@@ -127,6 +127,14 @@ def test_waypoints_are_few_and_end_slowly(ik):
         previous = target
 
 
+def test_travel_is_one_move_and_descent_stays_straight(robot):
+    down = np.diag([1, -1, -1])
+    robot._send_move([0.35, -0.23, 0.2], down, 5)   # home to above B0
+    assert len(robot.arm.joint_calls) == 1
+    robot._send_move([0.35, -0.23, 0.058], down, 5)  # descent
+    assert len(robot.arm.joint_calls) > 2
+
+
 def test_check3_round_trip_uses_joints_and_existing_gripper(robot):
     check3_grid(robot)
     assert robot.locations["B0"] == "waiting:B0"

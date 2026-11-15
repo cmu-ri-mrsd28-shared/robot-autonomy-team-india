@@ -20,14 +20,17 @@ class JointMotion:
         if not np.isfinite(self.speed) or self.speed <= 0:
             raise ValueError("speed must be a positive number in m/s")
 
-    def plan(self, xyz, rotation, seed, duration):
-        """Fewest joint targets that keep the tool near the Cartesian segment."""
+    def plan(self, xyz, rotation, seed, duration, straight=True):
+        """Fewest joint targets that keep the tool near the Cartesian segment.
+
+        With straight=False the segment is one joint move and the tool path may bow.
+        """
         seed = np.asarray(seed, dtype=float)
         start = self.ik.forward(seed)
         goal = self.ik.pose(xyz, rotation)
         delta = goal[:3, 3] - start[:3, 3]
         turn = Rotation.from_matrix(goal[:3, :3] @ start[:3, :3].T).as_rotvec()
-        for count in range(1, self.MAX_WAYPOINTS + 1):
+        for count in range(1, (self.MAX_WAYPOINTS if straight else 1) + 1):
             joints = self._targets(start, delta, turn, seed, count)
             if self._deviation(start[:3, 3], delta, joints) <= self.TOLERANCE:
                 break
@@ -84,8 +87,11 @@ class JointHardwareRobot(HardwareRobot):
         log(f"Flange-to-tool transform: {self.ik.tool.round(6).tolist()}")
 
     def _send_move(self, xyz, rotation, duration):
+        # Only moves that start or end below travel height pass close to blocks;
+        # everything else is a single joint move with no intermediate stop.
+        low = min(xyz[2], self._pose().translation[2]) < self.config["travel_height"] - 0.005
         # Plan the entire segment first: an IK failure must not leave a partial move.
-        waypoints = self.motion.plan(xyz, rotation, self.arm.get_joints(), duration)
+        waypoints = self.motion.plan(xyz, rotation, self.arm.get_joints(), duration, low)
         log(f"Joint motion: {len(waypoints)} waypoints, "
             f"planned duration={sum(seconds for _, seconds in waypoints):.1f}s")
         for i, (joints, seconds) in enumerate(waypoints, 1):
