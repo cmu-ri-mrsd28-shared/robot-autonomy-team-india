@@ -10,6 +10,10 @@ from robot import HardwareRobot
 
 
 class JointMotion:
+    TOLERANCE = 0.003  # m, allowed tool deviation from the straight segment
+    MAX_WAYPOINTS = 20
+    TERMINAL_VELOCITY = 0.002  # rad/s left when the controller ends a joint move
+
     def __init__(self, ik, speed):
         self.ik = ik
         self.speed = float(speed)
@@ -17,23 +21,38 @@ class JointMotion:
             raise ValueError("speed must be a positive number in m/s")
 
     def plan(self, xyz, rotation, seed, duration):
-        """Precompute nearby joint targets along a Cartesian segment before moving."""
+        """Fewest joint targets that keep the tool near the Cartesian segment."""
+        seed = np.asarray(seed, dtype=float)
         start = self.ik.forward(seed)
         goal = self.ik.pose(xyz, rotation)
         delta = goal[:3, 3] - start[:3, 3]
         turn = Rotation.from_matrix(goal[:3, :3] @ start[:3, :3].T).as_rotvec()
-        count = max(1, int(np.ceil(np.linalg.norm(delta) / 0.02)),
-                    int(np.ceil(np.linalg.norm(turn) / 0.15)))
-        previous = np.asarray(seed, dtype=float).copy()
-        waypoints = []
+        for count in range(1, self.MAX_WAYPOINTS + 1):
+            joints = self._targets(start, delta, turn, seed, count)
+            if self._deviation(start[:3, 3], delta, joints) <= self.TOLERANCE:
+                break
+        return [(end, self.duration(begin, end, duration / count))
+                for begin, end in zip(joints, joints[1:])]
+
+    def _targets(self, start, delta, turn, seed, count):
+        """The seed followed by count evenly spaced IK solutions, each seeded by the last."""
+        joints = [seed]
         for fraction in np.linspace(0, 1, count + 1)[1:]:
             point = start[:3, 3] + fraction * delta
             heading = Rotation.from_rotvec(fraction * turn).as_matrix() @ start[:3, :3]
-            joints = self.ik.solve(point, heading, previous)
-            seconds = self.duration(previous, joints, duration / count)
-            waypoints.append((joints, seconds))
-            previous = joints
-        return waypoints
+            joints.append(self.ik.solve(point, heading, joints[-1]))
+        return joints
+
+    def _deviation(self, origin, delta, joints):
+        """Largest tool distance from the segment while interpolating between joint targets."""
+        length = np.linalg.norm(delta)
+        axis = delta / length if length > 1e-9 else np.zeros(3)
+        worst = 0.0
+        for begin, end in zip(joints, joints[1:]):
+            for fraction in (0.25, 0.5, 0.75):
+                offset = self.ik.forward(begin + fraction * (end - begin))[:3, 3] - origin
+                worst = max(worst, float(np.linalg.norm(offset - axis * (offset @ axis))))
+        return worst
 
     def duration(self, start, end, minimum):
         """Scale conservative joint velocity/acceleration/jerk with global speed."""
@@ -41,10 +60,14 @@ class JointMotion:
         scale = self.speed / 0.05
         # Peak derivatives of a rest-to-rest minimum-jerk trajectory are
         # 1.875*d/T, 5.774*d/T^2 and 60*d/T^3. These set timing, not rejection gates.
+        # Last term: franka-interface finishes goto_joints once the generated
+        # position is within 1e-4 rad of the goal, i.e. while still decelerating at
+        # about 30*d/T*(1e-5/d)^(2/3) rad/s. Keep that below TERMINAL_VELOCITY.
         return max(float(minimum), 0.5 / scale,
                    1.875 * distance / (0.5 * scale),
                    np.sqrt(5.774 * distance) / scale,
-                   np.cbrt(60 * distance / 5.0) / scale)
+                   np.cbrt(60 * distance / 5.0) / scale,
+                   30 * 1e-5 ** (2 / 3) * np.cbrt(distance) / self.TERMINAL_VELOCITY)
 
 
 class JointHardwareRobot(HardwareRobot):

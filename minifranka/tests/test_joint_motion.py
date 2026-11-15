@@ -101,8 +101,29 @@ def test_joint_descent_approximates_vertical_line(ik):
         assert seconds > 0
         for fraction in (0.25, 0.5, 0.75, 1):
             point = ik.forward(previous + fraction * (target - previous))[:3, 3]
-            assert np.linalg.norm(point[:2] - [0.426, -0.175]) < 0.002
+            assert np.linalg.norm(point[:2] - [0.426, -0.175]) <= JointMotion.TOLERANCE
             assert point[2] >= 0.057
+        previous = target
+
+
+def controller_terminal_velocity(start, end, seconds):
+    """Joint speed when franka-interface's 1e-4 rad goal test ends a min-jerk move."""
+    distance = np.abs(end - start)
+    t = np.linspace(0, 1, 20001)[:, None]
+    remaining = distance * (1 - (10 * t**3 - 15 * t**4 + 6 * t**5))
+    done = t[np.argmax(np.all(remaining <= 1e-4, axis=1)), 0]
+    return float(np.max(distance) / seconds * 30 * done**2 * (1 - done) ** 2)
+
+
+def test_waypoints_are_few_and_end_slowly(ik):
+    # The first hardware --joints move: home down to travel height. It was 15
+    # waypoints of 0.44 s, and the first one faulted as the controller finished it.
+    home = np.array([0, -np.pi / 4, 0, -3 * np.pi / 4, 0, np.pi / 2, np.pi / 4])
+    waypoints = JointMotion(ik, 0.1).plan([0.3069, 0, 0.2], np.diag([1, -1, -1]), home, 5.4)
+    assert len(waypoints) <= 5
+    previous = home
+    for target, seconds in waypoints:
+        assert controller_terminal_velocity(previous, target, seconds) <= JointMotion.TERMINAL_VELOCITY
         previous = target
 
 

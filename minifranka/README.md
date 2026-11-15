@@ -311,8 +311,9 @@ and explicit X headings can also be combined with `--joints`.
 - `kinematics.py`: `PandaIK.forward()`, `align_tool()` and `solve()`. It uses
   the seven-joint Panda geometry from lab2, joint limits, and damped-Jacobian
   IK seeded by the current/previous joints. It uses NumPy/SciPy, not MuJoCo.
-- `joint_motion.py`: `JointMotion.plan()` precomputes nearby joint targets
-  along each requested tool segment, at most 20 mm / 0.15 rad apart.
+- `joint_motion.py`: `JointMotion.plan()` precomputes the fewest joint targets
+  that keep the joint-interpolated tool path within 3 mm of each requested
+  tool segment (typically 2 for a descent, 3-4 for a transit).
   `JointHardwareRobot` inherits the existing pick/place and gripper routines
   and overrides only arm execution. IK failure prevents that segment being
   sent; a controller error stops the sequence before its next gripper action.
@@ -330,6 +331,14 @@ Cartesian line or a full-arm collision planner. Waypoints stop between moves,
 so this diagnostic backend may run slower than the Cartesian backend. Global
 `speed` scales the joint timing, including conservative joint velocity,
 acceleration and jerk timing. SDK/controller limits remain enabled.
+
+franka-interface finishes a `goto_joints()` move once its generated position
+is within 1e-4 rad of the goal, which is before a short move has stopped
+decelerating; sub-second waypoints faulted with joint velocity/acceleration
+discontinuities for that reason. `JointMotion.duration()` therefore also
+keeps each waypoint long enough (about 4 s) that under 0.002 rad/s remains at
+that instant. This floor does not scale with `speed`, so `--joints` runs take
+roughly 8 s per descent and 12-16 s per transit at any speed setting.
 
 NumPy and SciPy are already listed in requirements.txt. For the joint backend
 on the lab machine, install them in its existing FrankaPy Python environment
