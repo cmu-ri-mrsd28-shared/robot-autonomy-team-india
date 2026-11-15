@@ -175,6 +175,8 @@ class HardwareRobot(Robot):
     SETTLE_VELOCITY = 0.01
     SETTLE_WINDOW = 0.5
     SETTLE_TIMEOUT = 5.0
+    # Active final-target tracking time, not a relaxed pose tolerance.
+    IMPEDANCE_BUFFER_TIME = 2.0
 
     def __init__(self, config, planner):
         self._setup(config, planner)
@@ -287,11 +289,16 @@ class HardwareRobot(Robot):
             to_frame="world",
         )
         self.arm.goto_pose(
-            pose, duration=float(duration),
-            use_impedance=self.config.get("cartesian_impedance", False), ignore_errors=False,
-            block=False,
+            pose, duration=float(duration), **self._control_options(),
         )
         self._wait_for_motion(duration)
+
+    def _control_options(self):
+        impedance = self.config.get("cartesian_impedance", False)
+        options = {"use_impedance": impedance, "ignore_errors": False, "block": False}
+        if impedance:
+            options["buffer_time"] = self.IMPEDANCE_BUFFER_TIME
+        return options
 
     def _send_vertical_move(self, xyz, rotation, duration):
         if not self.config.get("relative_vertical_motion", False):
@@ -317,9 +324,7 @@ class HardwareRobot(Robot):
             from_frame="world", to_frame="world")
         log(f"RELATIVE Z: dz={dz:.6f} m, identity rotation, {duration:.1f}s")
         self.arm.goto_pose_delta(
-            delta, duration=float(duration),
-            use_impedance=self.config.get("cartesian_impedance", False),
-            ignore_errors=False, block=False)
+            delta, duration=float(duration), **self._control_options())
         self._wait_for_motion(duration)
 
     def _check_relative_target(self, target):

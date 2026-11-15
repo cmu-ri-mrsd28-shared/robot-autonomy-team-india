@@ -148,6 +148,9 @@ def main():
               f"travel Z={config['travel_height']}, grasp Z={config['grasp_height']}, "
               f"relative Z={config.get('relative_vertical_motion', False)}, "
               f"cartesian impedance={config.get('cartesian_impedance', False)}", flush=True)
+        if config.get('cartesian_impedance', False):
+            log(f"Impedance final-target tracking buffer: {HardwareRobot.IMPEDANCE_BUFFER_TIME}s; "
+                "position error limit remains 0.005 m", flush=True)
         robot = HardwareRobot(config, Planner(config))
         try:
             if args.check is check3_grid:

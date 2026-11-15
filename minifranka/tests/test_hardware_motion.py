@@ -99,6 +99,11 @@ def test_relative_vertical_move_sends_only_world_z(robot, impedance):
     np.testing.assert_allclose(delta.rotation, np.eye(3))
     assert delta.from_frame == delta.to_frame == 'world'
     assert robot.arm.goto_pose_delta.call_args.kwargs['use_impedance'] is impedance
+    options = robot.arm.goto_pose_delta.call_args.kwargs
+    if impedance:
+        assert options['buffer_time'] == 2.0
+    else:
+        assert 'buffer_time' not in options
     robot._send_move.assert_not_called()
     robot._check_relative_target.assert_called_once()
     robot._wait_for_motion.assert_called_once_with(5.0)
@@ -151,4 +156,21 @@ def test_absolute_move_uses_selected_control_mode(robot, impedance):
     assert options['use_impedance'] is impedance
     assert options['ignore_errors'] is False
     assert options['block'] is False
+    if impedance:
+        assert options['buffer_time'] == 2.0
+    else:
+        assert 'buffer_time' not in options
     robot._wait_for_motion.assert_called_once_with(5.0)
+
+
+def test_impedance_tracking_error_still_stops_before_gripping(robot):
+    robot.config['cartesian_impedance'] = True
+    robot._send_move.return_value = None  # Skill finishes without reaching target.
+    robot.arm.get_pose.return_value = SimpleNamespace(
+        translation=np.array([0.293340, 0.000024, 0.216471]), rotation=np.eye(3))
+
+    with pytest.raises(RuntimeError, match='target not reached'):
+        robot._move([0.306980, 0.000005, 0.2], np.eye(3), 'Travel height')
+
+    robot._cancel_motion.assert_called_once()
+    robot._grip.assert_not_called()

@@ -246,6 +246,25 @@ and stop-on-first-error behavior apply. Check that the initial message reads
 `cartesian impedance=True`. The flag is optional, check-only, and does not
 edit the calibration config or change the default main.py control mode.
 
+The first impedance robot trial stopped during the initial travel move with
+21.39 mm position error, before pickup or X rotation. The 5 mm completion
+gate correctly rejected it. Impedance commands now provide a 2.0-second
+final-target tracking buffer via the SDK's `buffer_time`; the controller
+remains active until its termination criteria or timeout. This is a bounded
+tracking allowance, not a pose-error tolerance change or a retry. A time
+buffer does not resolve joint limits, contact, or steady tracking offsets.
+
+After syncing, check travel and rotation with the empty gripper first:
+
+```bash
+python3 calibration.py --check1-travel --speed 0.05 --relative-z --cartesian-impedance
+```
+
+If this still fails the position gate, keep the reported target, actual pose,
+joint state and controller-side termination output. Do not proceed to pickup
+or increase the allowed position error. Passing this check only validates the
+travel/orientation trial; repeat the rotate-and-place check separately.
+
 Before restarting, restore B0 to waiting and ensure the gripper is empty;
 the failed trial may have left the block held at travel height. A different
 fault or an endpoint error is still a failed trial: keep the first error
