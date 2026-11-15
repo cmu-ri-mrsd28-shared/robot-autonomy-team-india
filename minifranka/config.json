@@ -20,6 +20,6 @@
     "opening": 0.08,
     "force": 15.0
   },
-  "speed": 0.5,
+  "speed": 0.10,
   "grasp_height": 0.058179661
 }
