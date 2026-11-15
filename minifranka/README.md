@@ -245,3 +245,15 @@ the exact X axis. The offset applies only to the grid placement/pickup in
 these explicit-heading calibration checks; waiting pickup stays normal Y.
 The default offset is zero. No config is written and main.py is unchanged.
 This is a diagnostic variation, not a confirmed fix for the controller fault.
+
+### Normal X grasp headings
+
+Normal `X` grasps now choose the nearer of the two hardware-tested headings
+**93 degrees** and **267 degrees**, measured about base +Z from canonical Y0.
+These are 3 degrees off the exact X jaw-closing axis. This applies to main.py
+and checks using normal `X`, in hardware and simulation. It selects target
+orientations; it does not clamp wrist motion to an angular interval. Normal
+Y remains the nearer of 0 and 180 degrees. Explicit `--x90` / `--x270` tests
+still use their named heading plus the requested `--x-offset-deg`; the normal
+X correction is not added again. Existing grasp-clearance geometry remains
+the approximate X/Y model.
