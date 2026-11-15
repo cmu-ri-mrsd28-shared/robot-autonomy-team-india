@@ -290,3 +290,49 @@ and repeat; a Y correction is experimental until verified on hardware. Explicit
 check3 `--x90`/`--x270` headings still use only `--x-offset-deg` (zero by default),
 so the config X correction is not added a second time. Check5 intentionally
 uses `90 + configured X` to reproduce the X pose from the failed main run.
+
+## Optional IK and joint-motion calibration backend
+
+`main.py` and its default Cartesian execution are unchanged. Add `--joints`
+to an existing calibration check to use the new backend:
+
+```bash
+python3 calibration.py --check1-travel --joints
+python3 calibration.py --check3-grid --joints
+```
+
+In the team copy, `--speed 0.05` can also be supplied; otherwise set `speed`
+in config.json. Start pick/place checks with B0 in waiting, the grid empty
+and the gripper empty, as before. Check3 makes the same B0 -> top-left ->
+waiting round trip, using `goto_joints()` for every arm segment and the
+existing `goto_gripper()` for opening/grasping. The existing rotation tests
+and explicit X headings can also be combined with `--joints`.
+
+- `kinematics.py`: `PandaIK.forward()`, `align_tool()` and `solve()`. It uses
+  the seven-joint Panda geometry from lab2, joint limits, and damped-Jacobian
+  IK seeded by the current/previous joints. It uses NumPy/SciPy, not MuJoCo.
+- `joint_motion.py`: `JointMotion.plan()` precomputes nearby joint targets
+  along each requested tool segment, at most 20 mm / 0.15 rad apart.
+  `JointHardwareRobot` inherits the existing pick/place and gripper routines
+  and overrides only arm execution. IK failure prevents that segment being
+  sent; a controller error stops the sequence before its next gripper action.
+
+The fixed flange-to-tool transform is inferred at startup from measured
+joints and the reported tool pose, so the model uses the active SDK tool
+frame instead of the simulation's adjusted grasp site. Start with the robot
+stationary. This assumes the Panda geometry and robot-base coordinate frame
+match the hardware; it does not identify a different robot or calibrate
+kinematic errors. The inferred transform and every joint target are logged.
+
+Each waypoint uses a rest-to-rest SDK minimum-jerk joint move. Short pose
+segments approximate the requested straight tool path; they are not an exact
+Cartesian line or a full-arm collision planner. Waypoints stop between moves,
+so this diagnostic backend may run slower than the Cartesian backend. Global
+`speed` scales the joint timing, including conservative joint velocity,
+acceleration and jerk timing. SDK/controller limits remain enabled.
+
+NumPy and SciPy are already listed in requirements.txt. For the joint backend
+on the lab machine, install them in its existing FrankaPy Python environment
+if missing. No MuJoCo, model assets or plotting dependencies are needed by
+this backend. Offline tests verify FK/IK and mocked SDK calls, not hardware
+tracking or collision-free execution.

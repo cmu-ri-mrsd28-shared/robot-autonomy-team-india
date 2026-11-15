@@ -111,7 +111,11 @@ def main():
                          help='With --check3-grid: fixed downward X heading, +270 degrees (-90) about base +Z from canonical Y')
     parser.add_argument('--x-offset-deg', type=float,
                         help='With --check3-grid and --x90/--x270: add this yaw in degrees; e.g. 2 gives 92/272, -2 gives 88/268')
+    parser.add_argument('--joints', action='store_true',
+                        help='Use Panda IK + goto_joints for hardware checks; main.py is unchanged')
     args = parser.parse_args()
+    if args.joints and args.check is None:
+        parser.error('--joints requires a --check flag')
     if args.x_offset_deg is not None:
         if args.grid_orientation is None:
             parser.error('--x-offset-deg requires --x90 or --x270')
@@ -134,7 +138,12 @@ def main():
     else:
         log(f"Hardware check: speed={config['speed']} m/s, "
               f"travel Z={config['travel_height']}, grasp Z={config['grasp_height']}", flush=True)
-        robot = HardwareRobot(config, Planner(config))
+        if args.joints:
+            from joint_motion import JointHardwareRobot
+
+            robot = JointHardwareRobot(config, Planner(config))
+        else:
+            robot = HardwareRobot(config, Planner(config))
         try:
             if args.check is check3_grid:
                 check3_grid(robot, args.grid_orientation or "Y", args.x_offset_deg or 0.0)
