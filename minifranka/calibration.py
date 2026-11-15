@@ -94,6 +94,8 @@ def main():
     parser.add_argument('--speed', type=float, help='Override arm speed in m/s for this run; config.json is not edited')
     parser.add_argument('--relative-z', action='store_true',
                         help='Use translation-only goto_pose_delta for vertical travel, descents and lifts')
+    parser.add_argument('--cartesian-impedance', action='store_true',
+                        help='Use FrankaPy Cartesian impedance control with SDK default gains for all arm motions in this check')
     heading = parser.add_mutually_exclusive_group()
     heading.add_argument('--x90', dest='grid_orientation', action='store_const', const='X90',
                          help='With --check3-grid: fixed downward X heading, +90 degrees about base +Z from canonical Y')
@@ -104,6 +106,8 @@ def main():
     args = parser.parse_args()
     if args.relative_z and args.check is None:
         parser.error('--relative-z requires a hardware check')
+    if args.cartesian_impedance and args.check is None:
+        parser.error('--cartesian-impedance requires a hardware check')
     if args.x_offset_deg is not None:
         if args.grid_orientation is None:
             parser.error('--x-offset-deg requires --x90 or --x270')
@@ -121,6 +125,8 @@ def main():
         config['speed'] = args.speed
     if args.relative_z:
         config['relative_vertical_motion'] = True
+    if args.cartesian_impedance:
+        config['cartesian_impedance'] = True
     if args.move is not None:
         move_to_position(config, args.move)
     elif args.grasp:
@@ -128,7 +134,8 @@ def main():
     else:
         log(f"Hardware check: speed={config['speed']} m/s, "
               f"travel Z={config['travel_height']}, grasp Z={config['grasp_height']}, "
-              f"relative Z={config.get('relative_vertical_motion', False)}", flush=True)
+              f"relative Z={config.get('relative_vertical_motion', False)}, "
+              f"cartesian impedance={config.get('cartesian_impedance', False)}", flush=True)
         robot = HardwareRobot(config, Planner(config))
         try:
             if args.check is check3_grid:

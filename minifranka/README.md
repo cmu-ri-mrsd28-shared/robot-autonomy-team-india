@@ -225,6 +225,32 @@ at the endpoint. The same settling and 5 mm / 0.03 rad completion checks apply;
 a fault stops execution without retries or release. This is a candidate fix
 pending a physical robot run, not a confirmed resolution.
 
+The robot trial of relative Z with `use_impedance=False` still aborted before
+descending after the X turn, despite passing the measured-velocity settling
+check. Relative motion alone has not resolved the problem.
+
+The next comparison changes the control mode while retaining the relative-Z
+trajectory and full wrist rotation:
+
+```bash
+python3 calibration.py --check3-grid-rotate --speed 0.05 --relative-z --cartesian-impedance
+```
+
+`--cartesian-impedance` sends `use_impedance=True` for all arm commands in
+this check. FrankaPy selects its torque-based Cartesian impedance feedback
+controller instead of sending Cartesian poses through libfranka's motion
+generator IK. SDK default stiffness and damping are used. This changes the
+controller's compliance and tracking behavior; it remains a hardware
+experiment. The same speed, target poses, settling checks, endpoint checks
+and stop-on-first-error behavior apply. Check that the initial message reads
+`cartesian impedance=True`. The flag is optional, check-only, and does not
+edit the calibration config or change the default main.py control mode.
+
+Before restarting, restore B0 to waiting and ensure the gripper is empty;
+the failed trial may have left the block held at travel height. A different
+fault or an endpoint error is still a failed trial: keep the first error
+and preceding state messages rather than increasing thresholds to continue.
+
 
 ## Debugging
 

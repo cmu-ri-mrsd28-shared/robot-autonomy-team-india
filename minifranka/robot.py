@@ -287,7 +287,8 @@ class HardwareRobot(Robot):
             to_frame="world",
         )
         self.arm.goto_pose(
-            pose, duration=float(duration), use_impedance=False, ignore_errors=False,
+            pose, duration=float(duration),
+            use_impedance=self.config.get("cartesian_impedance", False), ignore_errors=False,
             block=False,
         )
         self._wait_for_motion(duration)
@@ -316,7 +317,8 @@ class HardwareRobot(Robot):
             from_frame="world", to_frame="world")
         log(f"RELATIVE Z: dz={dz:.6f} m, identity rotation, {duration:.1f}s")
         self.arm.goto_pose_delta(
-            delta, duration=float(duration), use_impedance=False,
+            delta, duration=float(duration),
+            use_impedance=self.config.get("cartesian_impedance", False),
             ignore_errors=False, block=False)
         self._wait_for_motion(duration)
 

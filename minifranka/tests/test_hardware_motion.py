@@ -84,8 +84,10 @@ def test_place_rejects_motion_that_returns_without_descending(robot):
     robot._grip.assert_not_called()
 
 
-def test_relative_vertical_move_sends_only_world_z(robot):
+@pytest.mark.parametrize('impedance', [False, True])
+def test_relative_vertical_move_sends_only_world_z(robot, impedance):
     robot.config['relative_vertical_motion'] = True
+    robot.config['cartesian_impedance'] = impedance
     robot.transform = lambda **values: SimpleNamespace(**values)
     robot._check_relative_target = Mock()
     robot._wait_for_motion = Mock()
@@ -96,6 +98,7 @@ def test_relative_vertical_move_sends_only_world_z(robot):
     np.testing.assert_allclose(delta.translation, [0, 0, -0.242])
     np.testing.assert_allclose(delta.rotation, np.eye(3))
     assert delta.from_frame == delta.to_frame == 'world'
+    assert robot.arm.goto_pose_delta.call_args.kwargs['use_impedance'] is impedance
     robot._send_move.assert_not_called()
     robot._check_relative_target.assert_called_once()
     robot._wait_for_motion.assert_called_once_with(5.0)
@@ -122,6 +125,7 @@ def test_relative_vertical_move_cannot_replace_rotation(robot):
 
 def test_relative_descent_fault_stops_before_release(robot):
     robot.config['relative_vertical_motion'] = True
+    robot.config['cartesian_impedance'] = True
     robot.transform = lambda **values: SimpleNamespace(**values)
     robot._check_relative_target = Mock()
     robot.arm.goto_pose_delta.side_effect = RuntimeError('relative motion fault')
@@ -132,3 +136,19 @@ def test_relative_descent_fault_stops_before_release(robot):
     robot.arm.goto_pose_delta.assert_called_once()
     robot._send_move.assert_not_called()
     robot._grip.assert_not_called()
+
+
+@pytest.mark.parametrize('impedance', [False, True])
+def test_absolute_move_uses_selected_control_mode(robot, impedance):
+    robot.config['cartesian_impedance'] = impedance
+    robot.transform = lambda **values: SimpleNamespace(**values)
+    robot._wait_for_motion = Mock()
+
+    # Call the real sender; the fixture replaces it for task-level tests.
+    HardwareRobot._send_move(robot, [0.4, 0, 0.3], np.eye(3), 5.0)
+
+    options = robot.arm.goto_pose.call_args.kwargs
+    assert options['use_impedance'] is impedance
+    assert options['ignore_errors'] is False
+    assert options['block'] is False
+    robot._wait_for_motion.assert_called_once_with(5.0)
