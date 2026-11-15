@@ -1,0 +1,4 @@
+numpy>=1.22
+mujoco>=3.2,<4
+# Hardware executor only needs NumPy and the robot PC's existing FrankaPy/ROS.
+# Development tests: pytest. No SciPy dependency.

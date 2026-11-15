@@ -1,0 +1,115 @@
+{
+  "simulation_passed": true,
+  "hardware_executed": false,
+  "physics": "MuJoCo 3.16.0; free cubes, contact grasps; noslip_iterations=3",
+  "config_hash": "fb1a69638ba92f8957319820c2c6e8f2dd72631555c4acb640c79fdd2c406a57",
+  "seed": 13,
+  "new_core_tests_passed": 9,
+  "combined_tests_passed": 36,
+  "pattern_results": [
+    {
+      "pattern": "pickaxe",
+      "moves": 5,
+      "skipped": false
+    },
+    {
+      "pattern": "axe",
+      "skipped": true,
+      "reason": "No feasible top-grasp ordering"
+    },
+    {
+      "pattern": "box",
+      "moves": 5,
+      "skipped": false
+    },
+    {
+      "pattern": "bow",
+      "moves": 5,
+      "skipped": false
+    }
+  ],
+  "all_patterns_and_reset": {
+    "passed": true,
+    "checkpoints": [
+      {
+        "label": "pickaxe",
+        "max_block_error_m": 0.0008724133764372902,
+        "block_errors_m": {
+          "R0": 0.0006920194841183788,
+          "R1": 0.0007606079049170526,
+          "R2": 0.0005096922738526133,
+          "R3": 0.00050969227345957,
+          "B0": 0.0006500100094838944,
+          "B1": 0.0008349952952057383,
+          "B2": 0.0008724133764372902,
+          "B3": 0.0005096922731835998
+        }
+      },
+      {
+        "label": "box",
+        "max_block_error_m": 0.0008962511378049899,
+        "block_errors_m": {
+          "R0": 0.0008962511378049899,
+          "R1": 0.0007606079049510661,
+          "R2": 0.0008205375254691984,
+          "R3": 0.0007681469145298022,
+          "B0": 0.0005797136319893866,
+          "B1": 0.0008349952952057723,
+          "B2": 0.0008724133767281231,
+          "B3": 0.0006854148627297167
+        }
+      },
+      {
+        "label": "bow",
+        "max_block_error_m": 0.001983254333790389,
+        "block_errors_m": {
+          "R0": 0.001983254333790389,
+          "R1": 0.0007606079045741385,
+          "R2": 0.0008205375254404846,
+          "R3": 0.0012103691471371328,
+          "B0": 0.0005692044358440418,
+          "B1": 0.0008349952953218572,
+          "B2": 0.0007446696809521527,
+          "B3": 0.0006854148627582591
+        }
+      },
+      {
+        "label": "final",
+        "max_block_error_m": 0.002510181004028102,
+        "block_errors_m": {
+          "R0": 0.002510181004028102,
+          "R1": 0.0005627794816965867,
+          "R2": 0.0007266187071219386,
+          "R3": 0.0012103691471611077,
+          "B0": 0.0005956267042259191,
+          "B1": 0.0005505411180016926,
+          "B2": 0.0007446696814971886,
+          "B3": 0.0006042517116167806
+        }
+      }
+    ],
+    "simulated_seconds": 1502.4479999782957
+  },
+  "rotate_place": {
+    "passed": true,
+    "checkpoints": [
+      {
+        "label": "final",
+        "max_block_error_m": 0.0005442582953672649,
+        "block_errors_m": {
+          "R0": 0.0005096922731699476,
+          "R1": 0.0005096922731879887,
+          "R2": 0.000509692273176137,
+          "R3": 0.0005096922737717786,
+          "B0": 0.0005442582953672649,
+          "B1": 0.0005096922742509336,
+          "B2": 0.0005096922742257454,
+          "B3": 0.0005096922732046455
+        }
+      }
+    ],
+    "simulated_seconds": 134.53599999991428
+  },
+  "rrt_searches_in_assignment_run": 0,
+  "note": "All assignment transfers admitted direct collision-checked joint edges. RRT fallback is separately tested with a blocking configuration-space obstacle."
+}
