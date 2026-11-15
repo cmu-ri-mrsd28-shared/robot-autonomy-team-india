@@ -1,5 +1,6 @@
 """Shared task and movement routines; only the backend differs on hardware."""
 
+import time
 import numpy as np
 
 
@@ -136,10 +137,18 @@ class Robot:
             np.clip((np.trace(current.rotation.T @ rotation) - 1) / 2, -1, 1)
         )
         if distance < 1e-5 and angle < 1e-4:
+            print(f"SKIP {label}: reported tool is already at {current.translation.round(5).tolist()}", flush=True)
             return
         duration = self.motion_duration(distance, angle, self.config["speed"])
         print(f"{label}: {xyz.round(5).tolist()}, {duration:.1f}s", flush=True)
+        started = time.monotonic()
         self._send_move(xyz, rotation, duration)
+        actual = self._pose()
+        rotation_error = np.arccos(np.clip((np.trace(actual.rotation.T@rotation)-1)/2,-1,1))
+        print(f"RETURNED {label}: actual XYZ={actual.translation.round(5).tolist()}, "
+              f"position error={np.linalg.norm(actual.translation-xyz):.5f} m, "
+              f"rotation error={rotation_error:.4f} rad, "
+              f"elapsed={time.monotonic()-started:.2f}s", flush=True)
 
     def _grip(self, close):
         width = 0.0 if close else self.config["gripper"]["opening"]

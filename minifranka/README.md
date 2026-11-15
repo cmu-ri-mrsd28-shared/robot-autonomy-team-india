@@ -136,3 +136,30 @@ for the MuJoCo actuators, analogous to FrankaPy's low-level Cartesian interface.
 Physics advances normally; blocks are neither attached nor snapped to targets.
 The simulated reported tool frame is aligned with grasp_height so both modes
 use the same two tool heights. Cube centers rest at table_height + box_width/2.
+
+## Individual hardware checks
+
+Run from the project folder in the lab's FrankaPy environment. Each check uses
+`speed`, `travel_height`, `grasp_height`, and gripper settings from `config.json`.
+These commands operate the physical robot.
+
+```bash
+python3 calibration.py --check1-travel   # Above B0; try Y and X, without descending
+python3 calibration.py --check2-pickone  # Pick B0 and return it to waiting
+python3 calibration.py --check3-grid     # B0 to top-left grid cell and back
+python3 calibration.py --check4-pattern  # Build pickaxe; leave it on the grid
+```
+
+Start each check with the grid empty, all blocks in their configured waiting
+positions, and the gripper empty. Check 1 does not move any blocks. Checks 2
+and 3 return B0 to its waiting position. Check 4 leaves the pickaxe pattern on
+the grid; return the blocks to waiting before starting a fresh check or main run.
+
+Other calibration commands remain available:
+
+```bash
+python3 calibration.py --grasp          # Read current tool Z as grasp_height; no motion
+python3 calibration.py --move B0        # Move to B0 XY at the common grasp height
+```
+
+`--grasp` prints the height for you to copy into JSON; it does not edit the file.
