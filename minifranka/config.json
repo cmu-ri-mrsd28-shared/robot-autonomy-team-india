@@ -10,15 +10,15 @@
     "B3": [0.60467415, -0.17337199, 0.06825573]
   },
   "grid": {
-    "center": [0.44, 0.0, 0.0201],
+    "center": [0.5130215, -0.02170547, 0.06901082],
     "spacing": 0.058
   },
-  "box_width": 0.04,
+  "box_width": 0.043,
   "table_height": 0.0001,
-  "travel_height": 0.3,
+  "travel_height": 0.2,
   "gripper": {
     "opening": 0.08,
-    "force": 15.0
+    "force": 10.0
   },
   "speed": 0.10,
   "grasp_yaw_offsets_deg": {"X": 3.0, "Y": 0.0},
