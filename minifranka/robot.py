@@ -14,10 +14,6 @@ class Robot:
 
             self.sim = Simulation(planner, show_viewer)
         else:
-            if config["tool_to_grasp"] is None:
-                raise ValueError(
-                    "Set tool_to_grasp to the measured tool-to-pinch offset before --hw"
-                )
             from frankapy import FrankaArm
             from autolab_core import RigidTransform
 
@@ -25,11 +21,9 @@ class Robot:
             self.transform = RigidTransform
 
     def pick_place(self, move):
-        print(
-            f"{NAMES[move.block]}: {move.source} -> {move.target}; "
-            f"{self.planner.labels[move.pick_axis]} / {self.planner.labels[move.place_axis]}",
-            flush=True,
-        )
+        grasp = ("current tool orientation" if self.hw else
+                 f"{self.planner.labels[move.pick_axis]} / {self.planner.labels[move.place_axis]}")
+        print(f"{NAMES[move.block]}: {move.source} -> {move.target}; {grasp}", flush=True)
         self.planner.apply(
             self.locations, move
         )  # Validate source, destination and grasps.
@@ -46,9 +40,6 @@ class Robot:
             except Exception:
                 pass
             raise
-
-    def _pose(self, center, rotation):
-        return np.array(center) - rotation @ np.array(self.config["tool_to_grasp"])
 
     def _move(self, xyz, rotation, label="move"):
         xyz = np.array(xyz)
@@ -93,32 +84,24 @@ class Robot:
         )
 
     def _hardware_move(self, move):
-        pick, place = (
-            self.planner.rotations[i] for i in (move.pick_axis, move.place_axis)
-        )
-        source = self._pose(self.planner.xyz(move.source), pick)
-        target = self._pose(self.planner.xyz(move.target), place)
-        pre_source = source - pick[:, 2] * self.config["approach_distance"]
-        pre_target = target - place[:, 2] * self.config["approach_distance"]
-        z = self.config["travel_height"]
+        # Same convention as calibration.py --move: configured XYZ is the
+        # tool target, and the current tool orientation is retained.
+        source = np.array(self.planner.xyz(move.source), dtype=float)
+        target = np.array(self.planner.xyz(move.target), dtype=float)
         current = self.arm.get_pose()
-        z = max(z, current.translation[2])
+        rotation = current.rotation.copy()
+        z = max(self.config["travel_height"], current.translation[2])
+
         self._grip(False)
-        self._move([*current.translation[:2], z], current.rotation, label="raise at current XY")
-        self._move([*pre_source[:2], z], current.rotation, label="above waiting block")
-        self._move([*pre_source[:2], z], pick, label="rotate above waiting block")
-        self._move(pre_source, pick, label="descend to pre-grasp")
-        self._move(source, pick, label="descend to grasp")
+        self._move([*current.translation[:2], z], rotation, label="lift at current XY")
+        self._move([*source[:2], z], rotation, label="above waiting block")
+        self._move(source, rotation, label="descend to block")
         self._grip(True)
-        self._move(pre_source, pick, label="retract after grasp")
-        self._move([*pre_source[:2], z], pick, label="lift waiting block")
-        self._move([*pre_target[:2], z], pick, label="transfer above destination")
-        self._move([*pre_target[:2], z], place, label="rotate above destination")
-        self._move(pre_target, place, label="descend to pre-place")
-        self._move(target, place, label="descend to place")
+        self._move([*source[:2], z], rotation, label="lift block")
+        self._move([*target[:2], z], rotation, label="above destination")
+        self._move(target, rotation, label="descend to place")
         self._grip(False)
-        self._move(pre_target, place, label="retract after release")
-        self._move([*pre_target[:2], z], place, label="final lift")
+        self._move([*target[:2], z], rotation, label="lift after release")
 
     def close(self):
         if self.sim:
