@@ -169,11 +169,18 @@ def test_joint_wait_propagates_controller_fault(robot):
     robot.arm.is_skill_done.assert_called_once_with(ignore_errors=False)
 
 
-def test_joint_wait_checks_terminal_status(robot):
-    robot.arm = Mock()
-    robot.arm.is_skill_done.return_value = True
-    robot.arm._get_current_franka_interface_status.return_value.franka_interface_status.error_description = ""
-    robot.arm._client.get_state.return_value = 4
-    robot.arm._client.get_goal_status_text.return_value = "aborted"
-    with pytest.raises(RuntimeError, match="aborted"):
-        JointHardwareRobot._wait_for_joint_motion(robot, 3)
+def aborted_arm():
+    """An arm whose action ended aborted with no controller error."""
+    arm = Mock()
+    arm.is_skill_done.return_value = True
+    arm._get_current_franka_interface_status.return_value.franka_interface_status.error_description = ""
+    arm._client.get_state.return_value = 4
+    arm._client.get_goal_status_text.return_value = "aborted"
+    return arm
+
+
+def test_aborted_action_without_error_waits_and_continues(robot):
+    # Logged at the last bow move: action aborted with no error while the arm was still moving.
+    robot.arm = aborted_arm()
+    JointHardwareRobot._wait_for_joint_motion(robot, 0)
+    robot._wait_until_settled.assert_called_once()

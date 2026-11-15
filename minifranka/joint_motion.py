@@ -133,4 +133,11 @@ class JointHardwareRobot(HardwareRobot):
         if status.error_description:
             raise RuntimeError(status.error_description)
         if self.arm._client.get_state() != 3:
-            raise RuntimeError("Joint motion failed: " + self.arm._client.get_goal_status_text())
+            # The action server also aborts, with no error, when franka-interface
+            # looks not ready for a moment; the move itself keeps running. Give it
+            # its whole duration again and carry on. _move() still verifies the
+            # tool pose at the end of the segment, before any gripper action.
+            log("Joint action ended without success or a controller error; "
+                "waiting for the arm to finish the move")
+            time.sleep(duration)
+            self._wait_until_settled("After interrupted joint action")
