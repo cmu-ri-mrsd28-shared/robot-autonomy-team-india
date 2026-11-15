@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 import numpy as np
+from console import log
 from robot import Robot, HardwareRobot
 from planner import Pattern, Planner
 
@@ -26,9 +27,9 @@ def move_to_position(config, name):
     pose = arm.get_pose()
     duration = Robot.motion_duration(float(np.linalg.norm(xyz - pose.translation)), 0.0, speed)
     pose.translation = xyz
-    print(f'Moving tool directly to {name}: {xyz.tolist()}, duration {duration:.1f}s; keeping current orientation', flush=True)
+    log(f'Moving tool directly to {name}: {xyz.tolist()}, duration {duration:.1f}s; keeping current orientation', flush=True)
     arm.goto_pose(pose, duration=duration, use_impedance=False, ignore_errors=False)
-    print('Reported tool XYZ:', arm.get_pose().translation.tolist(), flush=True)
+    log('Reported tool XYZ:', arm.get_pose().translation.tolist(), flush=True)
 
 
 def calibrate_grasp():
@@ -36,9 +37,9 @@ def calibrate_grasp():
     from frankapy import FrankaArm
 
     pose = FrankaArm().get_pose()
-    print("Current tool XYZ:", pose.translation.tolist())
-    print("Copy this height into config.json:")
-    print(json.dumps({"grasp_height": float(pose.translation[2])}, indent=2))
+    log("Current tool XYZ:", pose.translation.tolist())
+    log("Copy this height into config.json:")
+    log(json.dumps({"grasp_height": float(pose.translation[2])}, indent=2))
 
 
 def check1_travel(robot):
@@ -85,7 +86,7 @@ def main():
     elif args.grasp:
         calibrate_grasp()
     else:
-        print(f"Hardware check: speed={config['speed']} m/s, "
+        log(f"Hardware check: speed={config['speed']} m/s, "
               f"travel Z={config['travel_height']}, grasp Z={config['grasp_height']}", flush=True)
         robot = HardwareRobot(config, Planner(config))
         try:

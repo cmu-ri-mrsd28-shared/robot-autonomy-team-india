@@ -3,6 +3,8 @@
 import time
 import numpy as np
 
+from console import log
+
 
 class Robot:
     def __init__(self, config, planner, show_viewer=True):
@@ -49,7 +51,7 @@ class Robot:
     def pick_place(self, move):
         if self.locations[move.block] != move.source:
             raise ValueError("Block is not at the planned source")
-        print(
+        log(
             f"{move.block}: {move.source} -> {move.target} [{move.pick_axis}/{move.place_axis}]",
             flush=True,
         )
@@ -70,15 +72,15 @@ class Robot:
     def run_pattern(self, name, pattern):
         moves = self.planner.plan(pattern, self.locations)
         if moves is None:
-            print(f"Skip {name}: no feasible top-grasp plan", flush=True)
+            log(f"Skip {name}: no feasible top-grasp plan", flush=True)
             return None
-        print(f"{name}: {len(moves)} moves from current locations", flush=True)
+        log(f"{name}: {len(moves)} moves from current locations", flush=True)
         if not self.before_pattern(name, len(moves)):
             return False
         for move in moves:
             self.pick_place(move)
         self.completed_patterns += 1
-        print("Block locations:", self.locations, flush=True)
+        log("Block locations:", self.locations, flush=True)
         return True
 
     def close(self):
@@ -102,7 +104,7 @@ class Robot:
         rotation = self._pose().rotation.copy()
         point = self.planner.xyz(source)
         point[2] = self.config["grasp_height"]
-        self._move(point, rotation, "Descend to pick")
+        self._descend(point, rotation, "Descend to pick")
         self._grip(True)
         self._move([*point[:2], self.config["travel_height"]], rotation, "Lift block")
 
@@ -111,7 +113,7 @@ class Robot:
         rotation = self._pose().rotation.copy()
         point = self.planner.xyz(target)
         point[2] = self.config["grasp_height"]
-        self._move(point, rotation, "Descend to place")
+        self._descend(point, rotation, "Descend to place")
         self._grip(False)
         self._move(
             [*point[:2], self.config["travel_height"]], rotation, "Lift after release"
@@ -119,6 +121,9 @@ class Robot:
 
     def _pose(self):
         return self.sim.pose()
+
+    def _descend(self, xyz, rotation, label):
+        self._move(xyz, rotation, label)
 
     def _send_move(self, xyz, rotation, duration):
         self.sim.move(xyz, rotation, duration)
@@ -129,7 +134,7 @@ class Robot:
     def _jaw_width(self):
         return self.sim.jaw_width()
 
-    def _move(self, xyz, rotation, label):
+    def _move(self, xyz, rotation, label, duration_scale=1.0):
         xyz = np.asarray(xyz, dtype=float)
         current = self._pose()
         distance = np.linalg.norm(xyz - current.translation)
@@ -137,15 +142,15 @@ class Robot:
             np.clip((np.trace(current.rotation.T @ rotation) - 1) / 2, -1, 1)
         )
         if distance < 1e-5 and angle < 1e-4:
-            print(f"SKIP {label}: reported tool is already at {current.translation.round(5).tolist()}", flush=True)
+            log(f"SKIP {label}: reported tool is already at {current.translation.round(5).tolist()}", flush=True)
             return
-        duration = self.motion_duration(distance, angle, self.config["speed"])
-        print(f"{label}: {xyz.round(5).tolist()}, {duration:.1f}s", flush=True)
+        duration = duration_scale * self.motion_duration(distance, angle, self.config["speed"])
+        log(f"{label}: {xyz.round(5).tolist()}, {duration:.1f}s", flush=True)
         started = time.monotonic()
         self._send_move(xyz, rotation, duration)
         actual = self._pose()
         rotation_error = np.arccos(np.clip((np.trace(actual.rotation.T@rotation)-1)/2,-1,1))
-        print(f"RETURNED {label}: actual XYZ={actual.translation.round(5).tolist()}, "
+        log(f"RETURNED {label}: actual XYZ={actual.translation.round(5).tolist()}, "
               f"position error={np.linalg.norm(actual.translation-xyz):.5f} m, "
               f"rotation error={rotation_error:.4f} rad, "
               f"elapsed={time.monotonic()-started:.2f}s", flush=True)
@@ -153,9 +158,9 @@ class Robot:
     def _grip(self, close):
         width = 0.0 if close else self.config["gripper"]["opening"]
         force = self.config["gripper"]["force"] if close else 0.0
-        print("Grasp" if close else "Release", flush=True)
+        log("Grasp" if close else "Release", flush=True)
         self._send_grip(width, force)
-        print(f"Jaw width: {self._jaw_width():.4f} m", flush=True)
+        log(f"Jaw width: {self._jaw_width():.4f} m", flush=True)
 
 
 class HardwareRobot(Robot):
@@ -178,6 +183,30 @@ class HardwareRobot(Robot):
     def _pose(self):
         return self.arm.get_pose()
 
+    def _descend(self, xyz, rotation, label):
+        for attempt in range(2):
+            try:
+                self._move(xyz, rotation, label, duration_scale=2 ** attempt)
+                actual_z = self._pose().translation[2]
+                if abs(actual_z - xyz[2]) > 0.01:
+                    raise RuntimeError(
+                        f"{label} did not reach grasp height: Z={actual_z:.5f}, "
+                        f"target={xyz[2]:.5f}; gripper command cancelled"
+                    )
+                return
+            except Exception as error:
+                # Retry only the exact joint-jerk reflex observed on the robot.
+                jerk_reflex = '["cartesian_motion_generator_joint_acceleration_discontinuity"]'
+                if attempt or jerk_reflex not in str(error):
+                    log(f"Z failure during {label}: stopping without a gripper command; {error}")
+                    raise
+                log(f"Z failure during {label}: {error}")
+                log("Z failure: waiting up to 10 seconds for interface recovery before retry")
+                # franka-interface owns libfranka and performs automaticErrorRecovery.
+                self.arm.wait_for_franka_interface(timeout=10.0)
+                self.arm.stop_skill()
+                log(f"Retrying because of Z failure: {label}, attempt 2/2 at half speed")
+
     def _send_move(self, xyz, rotation, duration):
         pose = self.transform(
             translation=xyz,
@@ -186,8 +215,25 @@ class HardwareRobot(Robot):
             to_frame="world",
         )
         self.arm.goto_pose(
-            pose, duration=float(duration), use_impedance=False, ignore_errors=False
+            pose, duration=float(duration), use_impedance=False, ignore_errors=False,
+            block=False,
         )
+        # FrankaPy's blocking wait uses is_skill_done(ignore_errors=True).
+        # Poll explicitly so controller errors reach the calling movement routine.
+        deadline = time.monotonic() + float(duration) + 10.0
+        while not self.arm.is_skill_done(ignore_errors=False):
+            if time.monotonic() > deadline:
+                self.arm.stop_skill()
+                raise RuntimeError("Timed out waiting for Cartesian motion")
+            time.sleep(0.01)
+        status = self.arm._get_current_franka_interface_status().franka_interface_status
+        if status.error_description:
+            raise RuntimeError(status.error_description)
+        # A completed action can also mean aborted/rejected, not success (3).
+        if self.arm._client.get_state() != 3:
+            raise RuntimeError(
+                "Cartesian motion failed: " + self.arm._client.get_goal_status_text()
+            )
 
     def _send_grip(self, width, force):
         self.arm.goto_gripper(
