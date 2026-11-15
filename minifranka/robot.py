@@ -184,9 +184,10 @@ class HardwareRobot(Robot):
         return self.arm.get_pose()
 
     def _descend(self, xyz, rotation, label):
-        for attempt in range(2):
+        # Initial descent, one slower retry, then up to three center detours.
+        for attempt in range(5):
             try:
-                self._move(xyz, rotation, label, duration_scale=2 ** attempt)
+                self._move(xyz, rotation, label, duration_scale=1.0 if attempt == 0 else 2.0)
                 actual_z = self._pose().translation[2]
                 if abs(actual_z - xyz[2]) > 0.01:
                     raise RuntimeError(
@@ -195,17 +196,34 @@ class HardwareRobot(Robot):
                     )
                 return
             except Exception as error:
-                # Retry only the exact joint-jerk reflex observed on the robot.
                 jerk_reflex = '["cartesian_motion_generator_joint_acceleration_discontinuity"]'
-                if attempt or jerk_reflex not in str(error):
+                retryable = isinstance(error, TimeoutError) or jerk_reflex in str(error)
+                if attempt == 4 or not retryable:
                     log(f"Z failure during {label}: stopping without a gripper command; {error}")
                     raise
-                log(f"Z failure during {label}: {error}")
-                log("Z failure: waiting up to 10 seconds for interface recovery before retry")
+                action = "retry descent at half speed" if attempt == 0 else (
+                    f"center detour {attempt}/3, then retry descent at half speed"
+                )
+                log(f"Retrying because of Z failure during {label}: {action}; "
+                    f"waiting up to 10 seconds for interface recovery. Reason: {error}")
                 # franka-interface owns libfranka and performs automaticErrorRecovery.
+                # If readiness times out, propagate it: do not send a detour to a faulted arm.
                 self.arm.wait_for_franka_interface(timeout=10.0)
                 self.arm.stop_skill()
-                log(f"Retrying because of Z failure: {label}, attempt 2/2 at half speed")
+                if attempt >= 1:
+                    self._reposition_for_descent(xyz, rotation)
+
+    def _reposition_for_descent(self, xyz, rotation):
+        """Return through grid center at travel height, keeping the held block."""
+        z = self.config["travel_height"]
+        current = self._pose()
+        center = self.config["grid"]["center"]
+        self._move([*current.translation[:2], z], rotation,
+                   "Z recovery: rise to travel height", duration_scale=2.0)
+        self._move([*center[:2], z], rotation,
+                   "Z recovery: move to grid center", duration_scale=2.0)
+        self._move([*xyz[:2], z], rotation,
+                   "Z recovery: return above descent target", duration_scale=2.0)
 
     def _send_move(self, xyz, rotation, duration):
         pose = self.transform(
@@ -224,7 +242,7 @@ class HardwareRobot(Robot):
         while not self.arm.is_skill_done(ignore_errors=False):
             if time.monotonic() > deadline:
                 self.arm.stop_skill()
-                raise RuntimeError("Timed out waiting for Cartesian motion")
+                raise TimeoutError("Timed out waiting for Cartesian motion")
             time.sleep(0.01)
         status = self.arm._get_current_franka_interface_status().franka_interface_status
         if status.error_description:

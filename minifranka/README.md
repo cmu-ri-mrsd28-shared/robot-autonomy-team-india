@@ -163,3 +163,14 @@ python3 calibration.py --move B0        # Move to B0 XY at the common grasp heig
 ```
 
 `--grasp` prints the height for you to copy into JSON; it does not edit the file.
+
+
+## Debugging
+
+```
+while true;
+do;
+  rosservice call /get_current_franka_interface_status_server_node_1/get_current_franka_interface_status_server;
+  sleep 0.2
+done;
+```
