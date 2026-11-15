@@ -82,3 +82,53 @@ def test_place_rejects_motion_that_returns_without_descending(robot):
 
     robot._send_move.assert_called_once()
     robot._grip.assert_not_called()
+
+
+def test_relative_vertical_move_sends_only_world_z(robot):
+    robot.config['relative_vertical_motion'] = True
+    robot.transform = lambda **values: SimpleNamespace(**values)
+    robot._check_relative_target = Mock()
+    robot._wait_for_motion = Mock()
+
+    robot._send_vertical_move([0.4, 0, 0.058], np.eye(3), 5.0)
+
+    delta = robot.arm.goto_pose_delta.call_args.args[0]
+    np.testing.assert_allclose(delta.translation, [0, 0, -0.242])
+    np.testing.assert_allclose(delta.rotation, np.eye(3))
+    assert delta.from_frame == delta.to_frame == 'world'
+    robot._send_move.assert_not_called()
+    robot._check_relative_target.assert_called_once()
+    robot._wait_for_motion.assert_called_once_with(5.0)
+
+
+def test_relative_vertical_move_rejects_lateral_motion(robot):
+    robot.config['relative_vertical_motion'] = True
+
+    with pytest.raises(ValueError, match='XY within 1 mm'):
+        robot._send_vertical_move([0.45, 0, 0.058], np.eye(3), 5.0)
+
+    robot.arm.goto_pose_delta.assert_not_called()
+
+
+def test_relative_vertical_move_cannot_replace_rotation(robot):
+    robot.config['relative_vertical_motion'] = True
+    turn = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]])
+
+    with pytest.raises(ValueError, match='unchanged orientation'):
+        robot._send_vertical_move([0.4, 0, 0.058], turn, 5.0)
+
+    robot.arm.goto_pose_delta.assert_not_called()
+
+
+def test_relative_descent_fault_stops_before_release(robot):
+    robot.config['relative_vertical_motion'] = True
+    robot.transform = lambda **values: SimpleNamespace(**values)
+    robot._check_relative_target = Mock()
+    robot.arm.goto_pose_delta.side_effect = RuntimeError('relative motion fault')
+
+    with pytest.raises(RuntimeError, match='relative motion fault'):
+        robot._place('grid:0', 'X')
+
+    robot.arm.goto_pose_delta.assert_called_once()
+    robot._send_move.assert_not_called()
+    robot._grip.assert_not_called()

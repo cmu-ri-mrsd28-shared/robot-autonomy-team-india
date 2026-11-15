@@ -91,7 +91,7 @@ class Robot:
         point = self.planner.xyz(location)
         current = self._pose()
         z = self.config["travel_height"]
-        self._move([*current.translation[:2], z], current.rotation, "Travel height")
+        self._move([*current.translation[:2], z], current.rotation, "Travel height", vertical=True)
         self._move([*point[:2], z], current.rotation, "Move above " + str(location))
         # The two equivalent 180-degree headings grip the same axis. Pick the
         # one closest to the actual wrist orientation to avoid needless turns.
@@ -106,7 +106,7 @@ class Robot:
         point[2] = self.config["grasp_height"]
         self._descend(point, rotation, "Descend to pick")
         self._grip(True)
-        self._move([*point[:2], self.config["travel_height"]], rotation, "Lift block")
+        self._move([*point[:2], self.config["travel_height"]], rotation, "Lift block", vertical=True)
 
     def _place(self, target, orientation):
         self.move_above(target, orientation)
@@ -116,17 +116,20 @@ class Robot:
         self._descend(point, rotation, "Descend to place")
         self._grip(False)
         self._move(
-            [*point[:2], self.config["travel_height"]], rotation, "Lift after release"
+            [*point[:2], self.config["travel_height"]], rotation, "Lift after release", vertical=True
         )
 
     def _pose(self):
         return self.sim.pose()
 
     def _descend(self, xyz, rotation, label):
-        self._move(xyz, rotation, label)
+        self._move(xyz, rotation, label, vertical=True)
 
     def _send_move(self, xyz, rotation, duration):
         self.sim.move(xyz, rotation, duration)
+
+    def _send_vertical_move(self, xyz, rotation, duration):
+        self._send_move(xyz, rotation, duration)
 
     def _send_grip(self, width, force):
         self.sim.grip(width, force)
@@ -134,7 +137,7 @@ class Robot:
     def _jaw_width(self):
         return self.sim.jaw_width()
 
-    def _move(self, xyz, rotation, label, duration_scale=1.0):
+    def _move(self, xyz, rotation, label, duration_scale=1.0, vertical=False):
         xyz = np.asarray(xyz, dtype=float)
         current = self._pose()
         distance = np.linalg.norm(xyz - current.translation)
@@ -147,7 +150,10 @@ class Robot:
         duration = duration_scale * self.motion_duration(distance, angle, self.config["speed"])
         log(f"{label}: {xyz.round(5).tolist()}, {duration:.1f}s", flush=True)
         started = time.monotonic()
-        self._send_move(xyz, rotation, duration)
+        if vertical:
+            self._send_vertical_move(xyz, rotation, duration)
+        else:
+            self._send_move(xyz, rotation, duration)
         actual = self._pose()
         rotation_error = np.arccos(np.clip((np.trace(actual.rotation.T@rotation)-1)/2,-1,1))
         log(f"RETURNED {label}: actual XYZ={actual.translation.round(5).tolist()}, "
@@ -192,7 +198,7 @@ class HardwareRobot(Robot):
     def _descend(self, xyz, rotation, label):
         self._wait_until_settled("Before " + label)
         # One attempt only: preserve the first fault and leave the gripper alone.
-        self._move(xyz, rotation, label)
+        self._move(xyz, rotation, label, vertical=True)
 
     def _joint_sample(self):
         q = np.asarray(self.arm.get_joints(), dtype=float)
@@ -235,11 +241,11 @@ class HardwareRobot(Robot):
                 quiet_since = None
             time.sleep(0.05)
 
-    def _move(self, xyz, rotation, label, duration_scale=1.0):
+    def _move(self, xyz, rotation, label, duration_scale=1.0, vertical=False):
         try:
             self._log_joint_state("BEFORE " + label)
             log(f"TARGET {label}: R={np.asarray(rotation).round(6).tolist()}")
-            super()._move(xyz, rotation, label, duration_scale)
+            super()._move(xyz, rotation, label, duration_scale, vertical=vertical)
             actual = self._pose()
             position_error = float(np.linalg.norm(actual.translation - np.asarray(xyz)))
             angle_error = float(np.arccos(np.clip(
@@ -284,6 +290,49 @@ class HardwareRobot(Robot):
             pose, duration=float(duration), use_impedance=False, ignore_errors=False,
             block=False,
         )
+        self._wait_for_motion(duration)
+
+    def _send_vertical_move(self, xyz, rotation, duration):
+        if not self.config.get("relative_vertical_motion", False):
+            return self._send_move(xyz, rotation, duration)
+        current = self._pose()
+        xyz = np.asarray(xyz, dtype=float)
+        angle = np.arccos(np.clip((np.trace(current.rotation.T @ rotation) - 1) / 2, -1, 1))
+        if (xyz.shape != (3,) or not np.isfinite(xyz).all()
+                or np.linalg.norm(xyz[:2] - current.translation[:2]) > 0.001
+                or not np.isfinite(angle) or angle > 0.03):
+            raise ValueError("Relative Z requires XY within 1 mm and unchanged orientation (0.03 rad tolerance)")
+        # Keep the starting commanded orientation rather than sending measured
+        # orientation as a fresh absolute goal after the wrist turn.
+        target_xyz = current.translation.copy()
+        target_xyz[2] = xyz[2]
+        target = self.transform(
+            translation=target_xyz, rotation=current.rotation,
+            from_frame="franka_tool", to_frame="world")
+        self._check_relative_target(target)
+        dz = float(xyz[2] - current.translation[2])
+        delta = self.transform(
+            translation=np.array([0.0, 0.0, dz]), rotation=np.eye(3),
+            from_frame="world", to_frame="world")
+        log(f"RELATIVE Z: dz={dz:.6f} m, identity rotation, {duration:.1f}s")
+        self.arm.goto_pose_delta(
+            delta, duration=float(duration), use_impedance=False,
+            ignore_errors=False, block=False)
+        self._wait_for_motion(duration)
+
+    def _check_relative_target(self, target):
+        # The SDK world-frame delta branch skips the absolute-pose wall check;
+        # apply the same check to the predicted tool-base endpoint here.
+        from frankapy import FrankaConstants
+
+        tool_base_target = target * self.arm.get_tool_base_pose().inverse()
+        walls = FrankaConstants.WORKSPACE_WALLS[:, :3]
+        xyz = tool_base_target.translation
+        if (not np.isfinite(xyz).all() or np.any(xyz <= walls.min(axis=0))
+                or np.any(xyz >= walls.max(axis=0))):
+            raise ValueError("Relative Z target is outside workspace virtual walls")
+
+    def _wait_for_motion(self, duration):
         # FrankaPy's blocking wait uses is_skill_done(ignore_errors=True).
         # Poll explicitly so controller errors reach the calling movement routine.
         deadline = time.monotonic() + float(duration) + 10.0

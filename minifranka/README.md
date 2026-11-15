@@ -201,6 +201,30 @@ needs further investigation of the joint configuration and controller's
 trajectory handoff. A successful mock or simulation test cannot establish
 hardware success.
 
+To test the relative-Z candidate fix with the existing rotate-and-place test:
+
+```bash
+python3 calibration.py --check3-grid-rotate --speed 0.05 --relative-z
+```
+
+This still performs the full X wrist turn at travel height. Vertical travel,
+descents and lifts use `goto_pose_delta` with world displacement
+`[0, 0, target_z - measured_z]` and identity rotation, preserving the
+controller's starting commanded orientation. XY transfer and rotation still
+use `goto_pose`. Look for `relative Z=True` and `RELATIVE Z` in the output.
+The flag applies only to the current calibration run; it does not edit
+config.json or change the default main.py behavior. It also works with
+`--check3-grid --x90` or `--check3-grid --x270`.
+
+Relative vertical commands require XY within 1 mm of target and an unchanged
+orientation (0.03 rad tolerance). Their predicted tool-base endpoints are
+checked against FrankaPy's workspace walls, since its world-frame delta branch
+skips the absolute-pose wall check. The controller starts relative motion
+from its commanded pose, so an existing command/measurement offset can remain
+at the endpoint. The same settling and 5 mm / 0.03 rad completion checks apply;
+a fault stops execution without retries or release. This is a candidate fix
+pending a physical robot run, not a confirmed resolution.
+
 
 ## Debugging
 
