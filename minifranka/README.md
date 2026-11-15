@@ -248,12 +248,45 @@ This is a diagnostic variation, not a confirmed fix for the controller fault.
 
 ### Normal X grasp headings
 
-Normal `X` grasps now choose the nearer of the two hardware-tested headings
-**93 degrees** and **267 degrees**, measured about base +Z from canonical Y0.
+With the default configured X offset of 3 degrees, normal `X` grasps choose
+the nearer of the hardware-tested headings **93 degrees** and **267 degrees**,
+measured about base +Z from canonical Y0.
 These are 3 degrees off the exact X jaw-closing axis. This applies to main.py
 and checks using normal `X`, in hardware and simulation. It selects target
-orientations; it does not clamp wrist motion to an angular interval. Normal
+orientations; it does not clamp wrist motion to an angular interval. With the default Y offset of zero, normal
 Y remains the nearer of 0 and 180 degrees. Explicit `--x90` / `--x270` tests
 still use their named heading plus the requested `--x-offset-deg`; the normal
 X correction is not added again. Existing grasp-clearance geometry remains
 the approximate X/Y model.
+
+### X-to-Y rotation check and configured yaw offsets
+
+```bash
+python3 calibration.py --check5-x-to-y
+```
+
+Start with the gripper empty and no other robot-control script running. This
+check rises to `travel_height`, travels above grid cell 0, takes the fixed
+`90 + X offset` heading (93 degrees by default), travels above waiting B2
+while keeping that orientation, then rotates to the nearer configured Y pose.
+It never descends to grasp height or operates the gripper. It ends above B2,
+or stops at the first fault. It uses config speed (and `--speed` where supported).
+
+The new config entry is inline for editing:
+
+```json
+"grasp_yaw_offsets_deg": {"X": 3.0, "Y": 0.0}
+```
+
+| Key | Normal target headings, degrees about base +Z from canonical Y0 |
+|---|---|
+| X | `90 + X` and `270 - X`; X=3 gives 93 and 267 |
+| Y | `0 + Y` and `180 - Y`; Y=3 gives 3 and 177; Y=-3 gives 357 and 183 |
+
+Normal grasps choose the nearer target in each pair. These offsets apply in
+main.py, calibration and simulation; the tool stays downward. Y is initially
+zero to preserve the baseline. Run check5 with zero, then edit Y to 3 or -3
+and repeat; a Y correction is experimental until verified on hardware. Explicit
+check3 `--x90`/`--x270` headings still use only `--x-offset-deg` (zero by default),
+so the config X correction is not added a second time. Check5 intentionally
+uses `90 + configured X` to reproduce the X pose from the failed main run.

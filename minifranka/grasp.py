@@ -5,6 +5,10 @@ import numpy as np
 
 class Grasp:
     def __init__(self, config):
+        offsets = config.get("grasp_yaw_offsets_deg", {})
+        self.yaw_offsets = {"X": float(offsets.get("X", 3.0)), "Y": float(offsets.get("Y", 0.0))}
+        if not np.isfinite(list(self.yaw_offsets.values())).all():
+            raise ValueError("grasp_yaw_offsets_deg must contain finite degrees")
         self.x_yaw_offset_deg = 0.0  # Calibration-only offset for explicit X90/X270.
         self.half_box = config["box_width"] / 2
         # The original lab3 finger footprint, with the requested 10 mm allowance.
@@ -41,9 +45,11 @@ class Grasp:
         if axis == "Y0":
             return first
         if axis == "X":
-            # Hardware-tested near-X headings: 270-3=267 and 90+3=93 degrees.
-            first = self._yaw(first, -3.0)
-            second = self._yaw(second, 3.0)
+            first = self._yaw(first, -self.yaw_offsets["X"])
+            second = self._yaw(second, self.yaw_offsets["X"])
+        elif axis == "Y":
+            first = self._yaw(first, self.yaw_offsets["Y"])
+            second = self._yaw(second, -self.yaw_offsets["Y"])
         if reference is not None and np.trace(reference.T @ second) > np.trace(
             reference.T @ first
         ):

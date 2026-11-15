@@ -21,5 +21,6 @@
     "force": 15.0
   },
   "speed": 0.10,
+  "grasp_yaw_offsets_deg": {"X": 3.0, "Y": 0.0},
   "grasp_height": 0.058179661
 }
