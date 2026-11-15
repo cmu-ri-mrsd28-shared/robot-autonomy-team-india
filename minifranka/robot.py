@@ -187,6 +187,8 @@ class HardwareRobot(Robot):
         # Initial descent, one slower retry, then up to three center detours.
         for attempt in range(5):
             try:
+                if attempt >= 2:
+                    self._reposition_for_descent(xyz, rotation)
                 self._move(xyz, rotation, label, duration_scale=1.0 if attempt == 0 else 2.0)
                 actual_z = self._pose().translation[2]
                 if abs(actual_z - xyz[2]) > 0.01:
@@ -196,30 +198,45 @@ class HardwareRobot(Robot):
                     )
                 return
             except Exception as error:
-                jerk_reflex = '["cartesian_motion_generator_joint_acceleration_discontinuity"]'
-                retryable = isinstance(error, TimeoutError) or jerk_reflex in str(error)
-                if attempt == 4 or not retryable:
+                if attempt == 4 or not self._retryable_motion_error(error):
                     log(f"Z failure during {label}: stopping without a gripper command; {error}")
                     raise
                 action = "retry descent at half speed" if attempt == 0 else (
                     f"center detour {attempt}/3, then retry descent at half speed"
                 )
                 log(f"Retrying because of Z failure during {label}: {action}; "
-                    f"waiting up to 10 seconds for interface recovery. Reason: {error}")
-                # franka-interface owns libfranka and performs automaticErrorRecovery.
-                # If readiness times out, propagate it: do not send a detour to a faulted arm.
-                self.arm.wait_for_franka_interface(timeout=10.0)
-                self.arm.stop_skill()
-                if attempt >= 1:
-                    self._reposition_for_descent(xyz, rotation)
+                    f"cancelling the current motion and waiting for recovery. Reason: {error}")
+                self._recover_motion()
+
+    @staticmethod
+    def _retryable_motion_error(error):
+        message = str(error).lower()
+        jerk_reflex = '["cartesian_motion_generator_joint_acceleration_discontinuity"]'
+        return (isinstance(error, TimeoutError) or jerk_reflex in message
+                or ("motion finished commanded" in message and "still moving" in message))
+
+    def _recover_motion(self):
+        """Cancel this client's motion, wait for it to end, then await recovery."""
+        import rospy
+
+        # Avoid stop_skill(): its internal wait can suppress errors and wait indefinitely.
+        self.arm._client.cancel_goal()
+        if not self.arm._client.wait_for_result(rospy.Duration.from_sec(10.0)):
+            raise RuntimeError("Motion cancellation did not finish within 10 seconds; no retry sent")
+        # franka-interface owns libfranka and performs automaticErrorRecovery.
+        self.arm.wait_for_franka_interface(timeout=10.0)
+        # The action is now terminal and the interface ready; clear SDK skill bookkeeping.
+        if not self.arm.is_skill_done(ignore_errors=False):
+            raise RuntimeError("Previous motion is still active; no retry sent")
 
     def _reposition_for_descent(self, xyz, rotation):
         """Return through grid center at travel height, keeping the held block."""
         z = self.config["travel_height"]
         current = self._pose()
         center = self.config["grid"]["center"]
-        self._move([*current.translation[:2], z], rotation,
-                   "Z recovery: rise to travel height", duration_scale=2.0)
+        if abs(current.translation[2] - z) > 0.001:
+            self._move([*current.translation[:2], z], rotation,
+                       "Z recovery: rise to travel height", duration_scale=2.0)
         self._move([*center[:2], z], rotation,
                    "Z recovery: move to grid center", duration_scale=2.0)
         self._move([*xyz[:2], z], rotation,
@@ -241,7 +258,6 @@ class HardwareRobot(Robot):
         deadline = time.monotonic() + float(duration) + 10.0
         while not self.arm.is_skill_done(ignore_errors=False):
             if time.monotonic() > deadline:
-                self.arm.stop_skill()
                 raise TimeoutError("Timed out waiting for Cartesian motion")
             time.sleep(0.01)
         status = self.arm._get_current_franka_interface_status().franka_interface_status
