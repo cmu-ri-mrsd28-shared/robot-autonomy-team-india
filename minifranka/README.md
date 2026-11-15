@@ -290,3 +290,81 @@ and repeat; a Y correction is experimental until verified on hardware. Explicit
 check3 `--x90`/`--x270` headings still use only `--x-offset-deg` (zero by default),
 so the config X correction is not added a second time. Check5 intentionally
 uses `90 + configured X` to reproduce the X pose from the failed main run.
+
+## Optional IK and joint-motion calibration backend
+
+`main.py` still defaults to Cartesian hardware execution. Add `--joints`
+to an existing calibration check to use the new backend:
+
+```bash
+python3 calibration.py --check1-travel --joints
+python3 calibration.py --check3-grid --joints
+```
+
+In the team copy, `--speed 0.05` can also be supplied; otherwise set `speed`
+in config.json. Start pick/place checks with B0 in waiting, the grid empty
+and the gripper empty, as before. Check3 makes the same B0 -> top-left ->
+waiting round trip, using joint moves for every arm segment and the
+existing `goto_gripper()` for opening/grasping. The existing rotation tests
+and explicit X headings can also be combined with `--joints`.
+
+- `kinematics.py`: `PandaIK.forward()`, `align_tool()` and `solve()`. It uses
+  the seven-joint Panda geometry from lab2, joint limits, and damped-Jacobian
+  IK seeded by the current/previous joints. It uses NumPy/SciPy, not MuJoCo.
+- `joint_motion.py`: `JointMotion.plan()` sends moves at or above travel
+  height as one joint move (the tool path may bow by a few centimetres). For
+  descents and lifts it precomputes the fewest joint targets that keep the
+  joint-interpolated tool path within 3 mm of the vertical line (typically 2,
+  so one stop mid-descent).
+  `JointHardwareRobot` inherits the existing pick/place and gripper routines
+  and overrides only arm execution. IK failure prevents that segment being
+  sent; a controller error stops the sequence before its next gripper action.
+
+The fixed flange-to-tool transform is inferred at startup from measured
+joints and the reported tool pose, so the model uses the active SDK tool
+frame instead of the simulation's adjusted grasp site. Start with the robot
+stationary. This assumes the Panda geometry and robot-base coordinate frame
+match the hardware; it does not identify a different robot or calibrate
+kinematic errors. The inferred transform and every joint target are logged.
+
+Each waypoint uses a rest-to-rest SDK minimum-jerk joint move. Short pose
+segments approximate the requested straight tool path; they are not an exact
+Cartesian line or a full-arm collision planner. Waypoints stop between moves,
+so this diagnostic backend may run slower than the Cartesian backend. Global
+`speed` scales the joint timing, including conservative joint velocity,
+acceleration and jerk timing. SDK/controller limits remain enabled.
+
+Joint moves do not call `goto_joints()`. franka-interface finishes that skill
+once its generated position is within 1e-4 rad of the goal, which is before a
+short move has stopped decelerating; sub-second waypoints faulted with joint
+velocity/acceleration discontinuities for that reason.
+`JointHardwareRobot._start_joint_move()` builds the same FrankaPy skill
+(joint position, minimum-jerk trajectory, internal joint impedance) with the
+time-based termination handler instead, so every move runs its full duration
+plus the SDK's 0.2 s buffer. It uses FrankaPy internals (`Skill`,
+`FrankaArm._send_goal`). At speed 0.10 a descent or lift takes about 2.7 s
+and a transit 2-5 s; `speed` scales all of them.
+
+NumPy and SciPy are already listed in requirements.txt. For the joint backend
+on the lab machine, install them in its existing FrankaPy Python environment
+if missing. No MuJoCo, model assets or plotting dependencies are needed by
+this backend. Offline tests verify FK/IK and mocked SDK calls, not hardware
+tracking or collision-free execution.
+
+### Enable joint execution in main
+
+```bash
+python3 main.py --hw --joints
+```
+
+`--joints` requires `--hw`. The default `python3 main.py --hw` keeps Cartesian
+execution, and simulation is unchanged. Joint execution uses config.json's
+coordinates, speed and grasp offsets, the same pattern planner, persistent
+block locations and hardware pauses between patterns. The existing joint
+waypoint limitations described above still apply.
+
+To build only the first pattern with joint execution:
+
+```bash
+python3 main.py --hw --joints --pattern pickaxe
+```
