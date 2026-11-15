@@ -1,0 +1,3 @@
+numpy>=1.22
+# Use the robot PC existing FrankaPy/ROS installation.
+# No MuJoCo, SciPy, viewer, or simulation assets required.

@@ -12,6 +12,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import robot as robot_module
 from robot import HardwareRobot
+import calibration
 
 
 @pytest.fixture
@@ -211,3 +212,22 @@ def test_approach_at_clearance_avoids_redundant_height_command(robot):
 
     assert len(robot._move.call_args_list) == 2  # XY approach and orientation.
     assert all(not call.kwargs.get('vertical', False) for call in robot._move.call_args_list)
+
+
+def test_state_command_only_reads_feedback(robot, monkeypatch, capsys):
+    pose = robot.arm.get_pose.return_value
+    robot.arm.get_robot_state.return_value = {
+        'pose': pose, 'ee_force_torque': np.zeros(6), 'joint_torques': np.zeros(7)}
+    robot.arm.get_tool_base_pose.return_value = pose
+    sdk = SimpleNamespace(FrankaArm=Mock(return_value=robot.arm), __file__='test_sdk.py')
+    monkeypatch.setitem(sys.modules, 'frankapy', sdk)
+    monkeypatch.setattr(sys, 'argv', ['calibration.py', '--state'])
+
+    calibration.main()
+
+    output = capsys.readouterr().out
+    assert 'ee_force_torque' in output and 'rotation_determinant' in output
+    robot.arm.goto_pose.assert_not_called()
+    robot.arm.goto_pose_delta.assert_not_called()
+    robot.arm.goto_joints.assert_not_called()
+    robot.arm.goto_gripper.assert_not_called()

@@ -296,6 +296,29 @@ and preceding state messages rather than increasing thresholds to continue.
 
 ## Debugging
 
+The impedance travel trials still missed by about 16 mm when starting from
+home and approaching B0 at the higher height. The folded initial posture,
+relative-motion implementation and short tracking buffer do not by themselves
+explain this persistent tracking error. Impedance mode remains experimental
+and has not met the placement accuracy requirement. Keep the 5 mm stop gate.
+
+Capture feedback without another motion experiment:
+
+```bash
+python3 calibration.py --state
+```
+
+This reads the SDK's available robot-state fields (including estimated wrench
+and measured joint torques), tool pose/offset, rotation-matrix validity metrics,
+SDK location and default stiffness settings. It does not command the arm or
+gripper or edit configuration. `pose_desired` is libfranka's reported state
+and must not be treated as the impedance controller's trajectory target.
+The fields come from sequential reads, and a snapshot after the skill has
+ended cannot reconstruct its desired trajectory or prove a load-calibration
+problem. Configured load values may require checking the control PC/robot
+settings if the SDK does not export them. Share this output before tuning
+gains or performing another pickup attempt.
+
 ```
 while true
 do

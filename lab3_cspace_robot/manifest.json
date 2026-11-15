@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "geometry_hash": "31cc5f8da3bb5dac07916b5ca6c5b11b3a0162f345d9bbed25a5fa3821418971",
+  "plans": {
+    "patterns": {
+      "file": "plans/patterns.json",
+      "sha256": "bb93705f4dfec9d94a1950b375c25a52d3fdb3270c97851ff33064e582aeebc9"
+    },
+    "patterns-reset": {
+      "file": "plans/patterns-reset.json",
+      "sha256": "e505656fffe29664ce0a552373821a500e18c34cd484d5e10704699bd16b66c9"
+    },
+    "rotate-place": {
+      "file": "plans/rotate-place.json",
+      "sha256": "29ebe66a8e3e9f2a6a338209171d738c1ff5831570e93619e43a6a2353a8b3f9"
+    }
+  }
+}

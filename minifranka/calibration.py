@@ -42,6 +42,42 @@ def calibrate_grasp():
     log(json.dumps({"grasp_height": float(pose.translation[2])}, indent=2))
 
 
+def report_state():
+    """Read SDK state and frame information without arm or gripper commands."""
+    import frankapy
+
+    arm = frankapy.FrankaArm()
+    report = {
+        'frankapy_file': getattr(frankapy, '__file__', 'unknown'),
+        'robot_state': arm.get_robot_state(),
+        'reported_tool_pose': arm.get_pose(),
+        'tool_delta_pose': arm.get_tool_base_pose(),
+        'units': 'positions m; joint angles rad; joint torques Nm; wrench [N,N,N,Nm,Nm,Nm]',
+        'note': 'pose_desired is libfranka state, not necessarily the impedance trajectory goal; reads are sequential',
+    }
+    constants = getattr(frankapy, 'FrankaConstants', None)
+    for key in ('DEFAULT_TRANSLATIONAL_STIFFNESSES', 'DEFAULT_ROTATIONAL_STIFFNESSES'):
+        report[key] = getattr(constants, key, 'not exported by this SDK')
+
+    def encode(value):
+        if hasattr(value, 'rotation') and hasattr(value, 'translation'):
+            rotation = np.asarray(value.rotation, dtype=float)
+            return {
+                'translation': np.asarray(value.translation).tolist(),
+                'rotation': rotation.tolist(),
+                'rotation_determinant': float(np.linalg.det(rotation)),
+                'rotation_orthogonality_error': float(np.linalg.norm(rotation.T @ rotation - np.eye(3))),
+            }
+        if isinstance(value, np.ndarray):
+            return value.tolist()
+        if isinstance(value, np.generic):
+            return value.item()
+        return str(value)
+
+    log('Read-only robot state; no motion or gripper command sent:')
+    log(json.dumps(report, default=encode, indent=2))
+
+
 def check1_travel(robot):
     """Move above B0 and try both downward grasp orientations; no pickup."""
     robot.move_above("B0", "Y")
@@ -95,6 +131,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument('--grasp', action='store_true', help='Print the current tool Z as grasp_height; no motion')
+    mode.add_argument('--state', action='store_true', help='Read robot state, forces, frame data and SDK location; no motion')
     mode.add_argument('--move', choices=[f'{color}{i}' for color in 'RB' for i in range(4)], metavar='BOX', help='Move to a box XY at grasp_height')
     mode.add_argument('--check1-travel', dest='check', action='store_const', const=check1_travel, help='Above B0: try Y and X orientations without descending')
     mode.add_argument('--check2-pickone', dest='check', action='store_const', const=check2_pickone, help='Pick B0 and return it to its waiting position')
@@ -129,8 +166,11 @@ def main():
         parser.error('--x90 and --x270 require --check3-grid')
     if args.speed is not None and (not np.isfinite(args.speed) or args.speed <= 0):
         parser.error('--speed must be a positive finite value in m/s')
-    if not args.grasp and args.move is None and args.check is None:
+    if not args.grasp and not args.state and args.move is None and args.check is None:
         parser.print_help()
+        return
+    if args.state:
+        report_state()
         return
     config = json.loads(Path(__file__).with_name('config.json').read_text())
     if args.speed is not None:
