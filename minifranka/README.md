@@ -293,7 +293,7 @@ uses `90 + configured X` to reproduce the X pose from the failed main run.
 
 ## Optional IK and joint-motion calibration backend
 
-`main.py` and its default Cartesian execution are unchanged. Add `--joints`
+`main.py` still defaults to Cartesian hardware execution. Add `--joints`
 to an existing calibration check to use the new backend:
 
 ```bash
@@ -336,3 +336,21 @@ on the lab machine, install them in its existing FrankaPy Python environment
 if missing. No MuJoCo, model assets or plotting dependencies are needed by
 this backend. Offline tests verify FK/IK and mocked SDK calls, not hardware
 tracking or collision-free execution.
+
+### Enable joint execution in main
+
+```bash
+python3 main.py --hw --joints
+```
+
+`--joints` requires `--hw`. The default `python3 main.py --hw` keeps Cartesian
+execution, and simulation is unchanged. Joint execution uses config.json's
+coordinates, speed and grasp offsets, the same pattern planner, persistent
+block locations and hardware pauses between patterns. The existing joint
+waypoint limitations described above still apply.
+
+To build only the first pattern with joint execution:
+
+```bash
+python3 main.py --hw --joints --pattern pickaxe
+```

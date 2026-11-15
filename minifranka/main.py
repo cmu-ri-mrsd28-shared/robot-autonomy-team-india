@@ -49,7 +49,11 @@ def main():
                         help="print the available patterns and exit")
     parser.add_argument("--plan-only", action="store_true",
                         help="print the planned moves without moving anything")
+    parser.add_argument("--joints", action="store_true",
+                        help="with --hw: use Panda IK and goto_joints instead of Cartesian commands")
     args = parser.parse_args()
+    if args.joints and not args.hw:
+        parser.error("--joints requires --hw")
 
     selected = {name: patterns[name] for name in (args.pattern or patterns)}
     if args.list:
@@ -62,7 +66,12 @@ def main():
         return
 
     print("Patterns to run:", ", ".join(selected), flush=True)
-    robot = HardwareRobot(config, planner) if args.hw else Robot(config, planner)
+    if args.joints:
+        from joint_motion import JointHardwareRobot
+
+        robot = JointHardwareRobot(config, planner)
+    else:
+        robot = HardwareRobot(config, planner) if args.hw else Robot(config, planner)
     try:
         for name, pattern in selected.items():
             if robot.run_pattern(name, pattern) is False:
