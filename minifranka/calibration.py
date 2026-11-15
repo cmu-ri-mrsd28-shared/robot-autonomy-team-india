@@ -54,12 +54,16 @@ def check2_pickone(robot):
     robot.place("B0", "Y")
 
 
-def check3_grid(robot):
-    """Place B0 in the empty top-left cell and return it, keeping Y throughout."""
-    robot.pick("B0", "Y")
-    robot.place((0, 0), "Y")
-    robot.pick("B0", "Y")
-    robot.place("B0", "Y")
+def check3_grid(robot, grid_orientation="Y"):
+    """Round trip via top-left; optionally test an exact downward X heading."""
+    waiting_orientation = "Y" if grid_orientation == "Y" else "Y0"
+    if grid_orientation != "Y":
+        log(f"Testing {grid_orientation}: fixed heading about base +Z relative to canonical "
+            "downward Y; waiting uses fixed Y0, grid uses the selected X heading")
+    robot.pick("B0", waiting_orientation)
+    robot.place((0, 0), grid_orientation)
+    robot.pick("B0", grid_orientation)
+    robot.place("B0", waiting_orientation)
 
 
 def check3_grid_rotate(robot):
@@ -86,7 +90,14 @@ def main():
     mode.add_argument('--check3-grid-rotate', dest='check', action='store_const', const=check3_grid_rotate, help='B0 Y pickup, X placement at top-left cell, then return; stop on first fault')
     mode.add_argument('--check4-pattern', dest='check', action='store_const', const=check4_pattern, help='Build pickaxe; leave the pattern in the grid')
     parser.add_argument('--speed', type=float, help='Override arm speed in m/s for this run; config.json is not edited')
+    heading = parser.add_mutually_exclusive_group()
+    heading.add_argument('--x90', dest='grid_orientation', action='store_const', const='X90',
+                         help='With --check3-grid: fixed downward X heading, +90 degrees about base +Z from canonical Y')
+    heading.add_argument('--x270', dest='grid_orientation', action='store_const', const='X270',
+                         help='With --check3-grid: fixed downward X heading, +270 degrees (-90) about base +Z from canonical Y')
     args = parser.parse_args()
+    if args.grid_orientation is not None and args.check is not check3_grid:
+        parser.error('--x90 and --x270 require --check3-grid')
     if args.speed is not None and (not np.isfinite(args.speed) or args.speed <= 0):
         parser.error('--speed must be a positive finite value in m/s')
     if not args.grasp and args.move is None and args.check is None:
@@ -104,7 +115,10 @@ def main():
               f"travel Z={config['travel_height']}, grasp Z={config['grasp_height']}", flush=True)
         robot = HardwareRobot(config, Planner(config))
         try:
-            args.check(robot)
+            if args.check is check3_grid:
+                check3_grid(robot, args.grid_orientation or "Y")
+            else:
+                args.check(robot)
         finally:
             robot.close()
 
