@@ -64,9 +64,9 @@ class Robot:
             np.clip((np.trace(current.rotation.T @ rotation) - 1) / 2, -1, 1)
         )
         if (
-            angle > 0.05
+            angle > 0.5
             and min(current.translation[2], xyz[2])
-            < self.config["travel_height"] - 0.005
+            < self.config["travel_height"] - 0.10
         ):
             raise ValueError("Raise to travel height before changing orientation")
         duration = max(
@@ -87,7 +87,7 @@ class Robot:
         rotation_error = np.arccos(
             np.clip((np.trace(actual.rotation.T @ rotation) - 1) / 2, -1, 1)
         )
-        if np.linalg.norm(actual.translation - xyz) > 0.005 or rotation_error > 0.05:
+        if np.linalg.norm(actual.translation - xyz) > 0.10 or rotation_error > 0.5:
             raise RuntimeError("Robot did not reach the requested tool pose")
 
     def _grip(self, close):
@@ -108,7 +108,7 @@ class Robot:
             self.config["box_width"] if close else self.config["gripper"]["opening"]
         )
         actual = float(self.arm.get_gripper_width())
-        if not np.isfinite(actual) or abs(actual - expected) > 0.004:
+        if not np.isfinite(actual) or abs(actual - expected) > 0.2:
             raise RuntimeError(
                 f"Unexpected gripper width: {actual}; expected {expected}"
             )

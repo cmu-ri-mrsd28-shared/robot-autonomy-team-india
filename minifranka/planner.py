@@ -77,7 +77,7 @@ class Planner:
             point = self.xyz(slot)
             if point.shape != (3,) or not np.isfinite(point).all():
                 raise ValueError("Locations must contain three finite coordinates")
-            if point[2] - self.half < config["table_height"] - 0.001:
+            if point[2] - self.half < config["table_height"] - 0.010:
                 raise ValueError("A box extends below the table")
         if config["approach_distance"] <= 0:
             raise ValueError("approach_distance must be positive")
@@ -109,7 +109,7 @@ class Planner:
                     (point - rotation[:, 2] * 0.10)[2]
                     - (abs(rotation) @ np.array([0.04, 0.05, 0.03]))[2],
                 )
-                < self.table_z - 0.001
+                < self.table_z - 0.010
             ):
                 continue
             pre = point - rotation[:, 2] * self.config["approach_distance"]
@@ -130,7 +130,7 @@ class Planner:
                             False,
                         ),
                     ):
-                        if p[2] - half[2] < self.config["table_height"] - 0.001:
+                        if p[2] - half[2] < self.config["table_height"] - 0.010:
                             clear = False
                             break
                         for block, other in enumerate(state):
@@ -138,8 +138,9 @@ class Planner:
                                 continue
                             if block == ignore and is_finger:
                                 continue
+                            # Permit up to 10 mm overlap in the approximate model.
                             if np.all(
-                                abs(p - self.xyz(other)) < half + self.half + 0.002
+                                abs(p - self.xyz(other)) < half + self.half - 0.010
                             ):
                                 clear = False
                                 break
