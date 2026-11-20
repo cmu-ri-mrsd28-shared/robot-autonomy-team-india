@@ -1,0 +1,2267 @@
+{
+  "n": 50,
+  "successes": 36,
+  "rate": 0.72,
+  "wilson95": [
+    0.5833461285401034,
+    0.8252598564231963
+  ],
+  "results": [
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.0109999999999253,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 2.575646946605655,
+      "arm_movement_m": 0.043961543612676804,
+      "intercept_error_m": 0.018610894015903236,
+      "episode_return": 41.45009356328151,
+      "episode_duration_s": 1.6799999999999258,
+      "throw": {
+        "position": [
+          1.0563785096121803,
+          -0.5682937061860039,
+          0.0750731641373116
+        ],
+        "velocity": [
+          -0.8034375253182651,
+          0.9638689709601601,
+          3.476520353245567
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.8618220869577217,
+        "angle_deg": -50.18694394696092,
+        "speed_m_s": 3.6960450506994658,
+        "flight_s": 0.6868132546038588,
+        "required_movement_m": 0.11002596912985024,
+        "target": [
+          0.5045669679774725,
+          0.09370427877081586,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 0
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.0049999999999253,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 3.1149177921759783,
+      "arm_movement_m": 0.04517108772793879,
+      "intercept_error_m": 0.02074392084729753,
+      "episode_return": 40.09095128496294,
+      "episode_duration_s": 1.6799999999999258,
+      "throw": {
+        "position": [
+          1.6005461423792846,
+          0.032517921131750935,
+          0.12389081007179517
+        ],
+        "velocity": [
+          -1.7188977930881253,
+          -0.07520862356191704,
+          3.3796333815656854
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 1.172538080825773,
+        "angle_deg": 2.505320598546888,
+        "speed_m_s": 3.792385496482974,
+        "flight_s": 0.6814933002904818,
+        "required_movement_m": 0.1344151309211886,
+        "target": [
+          0.42912881250563234,
+          -0.0187362519497644,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 1
+    },
+    {
+      "tool": "box",
+      "success": false,
+      "outcome": "rim_hit_no_entry",
+      "entered": false,
+      "contact": true,
+      "rim_hit": true,
+      "finger_strike": false,
+      "retention_s": 0.0,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 3.077641235270735,
+      "arm_movement_m": 0.147743590868086,
+      "intercept_error_m": 0.05948032651708869,
+      "episode_return": -1.6494395102614967,
+      "episode_duration_s": 0.8000000000000006,
+      "throw": {
+        "position": [
+          1.4022850728750407,
+          0.5961209254262092,
+          0.20271492701676014
+        ],
+        "velocity": [
+          -1.5025223927547977,
+          -1.247810237258215,
+          2.402998850410733
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.9986367022914966,
+        "angle_deg": 39.708850368011994,
+        "speed_m_s": 3.0966122463123003,
+        "flight_s": 0.5113082468678897,
+        "required_movement_m": 0.08312997330683447,
+        "target": [
+          0.6340329823558383,
+          -0.04189473941009409,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 2
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.015999999999912,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 3.3131989208018804,
+      "arm_movement_m": 0.22869590624920333,
+      "intercept_error_m": 0.030397497075463215,
+      "episode_return": 40.56517883531704,
+      "episode_duration_s": 1.7999999999999126,
+      "throw": {
+        "position": [
+          0.6737708086228902,
+          -0.8992893503674657,
+          0.17965699857366896
+        ],
+        "velocity": [
+          -0.29272377074463607,
+          1.0669356887747772,
+          3.7745701829399585
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.8602656137364025,
+        "angle_deg": -74.6578806819955,
+        "speed_m_s": 3.93337247611762,
+        "flight_s": 0.7775618446585335,
+        "required_movement_m": 0.13538120435169726,
+        "target": [
+          0.4461599734672893,
+          -0.06968086807172687,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 3
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.0089999999999342,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 2.7768446275621788,
+      "arm_movement_m": 0.10375372170767881,
+      "intercept_error_m": 0.015527465216891747,
+      "episode_return": 41.67697041140919,
+      "episode_duration_s": 1.5999999999999346,
+      "throw": {
+        "position": [
+          0.8100420382360904,
+          0.5055280454321999,
+          0.24730199326458635
+        ],
+        "velocity": [
+          -0.5554607847807034,
+          -0.8500315616359624,
+          2.6347297423469396
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.5809895314471174,
+        "angle_deg": 56.83702968851381,
+        "speed_m_s": 2.823630845987846,
+        "flight_s": 0.5721632349644588,
+        "required_movement_m": 0.07258156369508154,
+        "target": [
+          0.4922277987200662,
+          0.019171237304676885,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 4
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.011999999999921,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 3.197870083967218,
+      "arm_movement_m": 0.21135066243039394,
+      "intercept_error_m": 0.02814760747233266,
+      "episode_return": 40.061230586730495,
+      "episode_duration_s": 1.7199999999999214,
+      "throw": {
+        "position": [
+          1.2067326915620944,
+          1.1417653756949517,
+          0.17149707048716606
+        ],
+        "velocity": [
+          -1.0523860529837146,
+          -1.6164382761359632,
+          3.3388375812097473
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 1.3258023150507068,
+        "angle_deg": 56.93376317627215,
+        "speed_m_s": 3.855933803732969,
+        "flight_s": 0.6873605313589223,
+        "required_movement_m": 0.0846283168031376,
+        "target": [
+          0.48336405498848944,
+          0.0306895033012358,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 5
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.0179999999999318,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 2.648745776125782,
+      "arm_movement_m": 0.13606448706640759,
+      "intercept_error_m": 0.009707226087087654,
+      "episode_return": 41.02508355729369,
+      "episode_duration_s": 1.6199999999999324,
+      "throw": {
+        "position": [
+          0.8748494585508811,
+          0.7812479858858211,
+          0.10516190095352136
+        ],
+        "velocity": [
+          -0.39026699515034763,
+          -1.3548682279098219,
+          2.992762978291293
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.8390821822971255,
+        "angle_deg": 73.93106338342673,
+        "speed_m_s": 3.3082633641737402,
+        "flight_s": 0.5951122692090056,
+        "required_movement_m": 0.08417888034823412,
+        "target": [
+          0.6425967814695778,
+          -0.025050719704777215,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 6
+    },
+    {
+      "tool": "box",
+      "success": false,
+      "outcome": "rim_hit_no_entry",
+      "entered": false,
+      "contact": true,
+      "rim_hit": true,
+      "finger_strike": false,
+      "retention_s": 0.0,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 3.0610967574356867,
+      "arm_movement_m": 0.1777137817411985,
+      "intercept_error_m": 0.06427893253276329,
+      "episode_return": -1.1928571308614222,
+      "episode_duration_s": 1.0999999999999897,
+      "throw": {
+        "position": [
+          1.1708810144866022,
+          0.6237389684663002,
+          0.08812824376264364
+        ],
+        "velocity": [
+          -0.7935701616041937,
+          -0.7235824319733618,
+          3.5651337269232335
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.7617688883216234,
+        "angle_deg": 42.35876229472177,
+        "speed_m_s": 3.7233726147264035,
+        "flight_s": 0.7093284068541061,
+        "required_movement_m": 0.1195782913607083,
+        "target": [
+          0.6079791560289439,
+          0.11048139476701577,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 7
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.003999999999921,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 2.690038798068424,
+      "arm_movement_m": 0.041645596429432045,
+      "intercept_error_m": 0.016105148121786206,
+      "episode_return": 40.73834286385998,
+      "episode_duration_s": 1.7199999999999214,
+      "throw": {
+        "position": [
+          0.9200184690849161,
+          -0.8470841418206239,
+          0.13688375357825677
+        ],
+        "velocity": [
+          -0.5362890344814453,
+          1.320770491163173,
+          3.624170807840453
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 1.0484557365110487,
+        "angle_deg": -67.90075402889221,
+        "speed_m_s": 3.894438940750692,
+        "flight_s": 0.7355020842976695,
+        "required_movement_m": 0.12963541202778522,
+        "target": [
+          0.5255767664378284,
+          0.12434530730874664,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 8
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.0019999999999185,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 3.0446416170334882,
+      "arm_movement_m": 0.10795412398408018,
+      "intercept_error_m": 0.016970561486650805,
+      "episode_return": 40.52624898833558,
+      "episode_duration_s": 1.7399999999999192,
+      "throw": {
+        "position": [
+          0.993924050798764,
+          -1.0477452593856087,
+          0.24128874350911594
+        ],
+        "velocity": [
+          -0.5337529112730262,
+          1.554598411393734,
+          3.5586222806376324
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 1.2336856256720394,
+        "angle_deg": -71.05069947623832,
+        "speed_m_s": 3.9198802184825667,
+        "flight_s": 0.7505653024617489,
+        "required_movement_m": 0.1230704011154628,
+        "target": [
+          0.5933076355092861,
+          0.11908236746868357,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 9
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.0149999999999297,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 2.7876679839373466,
+      "arm_movement_m": 0.13664883936514177,
+      "intercept_error_m": 0.027934704204120052,
+      "episode_return": 40.76097047999678,
+      "episode_duration_s": 1.6399999999999302,
+      "throw": {
+        "position": [
+          1.0510624299810238,
+          -1.147879720661432,
+          0.09603523117911071
+        ],
+        "velocity": [
+          -0.8129905911661138,
+          1.9347447623627612,
+          3.1864351356796417
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 1.3274692294559047,
+        "angle_deg": -67.20758120582647,
+        "speed_m_s": 3.8154370484530995,
+        "flight_s": 0.6325449467293065,
+        "required_movement_m": 0.08007598303080105,
+        "target": [
+          0.536809339800427,
+          0.07593330198212557,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 10
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.013999999999934,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 3.2284335637850017,
+      "arm_movement_m": 0.07128690785113667,
+      "intercept_error_m": 0.031822124125962775,
+      "episode_return": 40.73559065313415,
+      "episode_duration_s": 1.5999999999999346,
+      "throw": {
+        "position": [
+          1.6278364837772579,
+          0.40451286496923355,
+          0.09863292030102061
+        ],
+        "velocity": [
+          -2.075047421795011,
+          -0.7805334006306016,
+          2.8456605325933007
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 1.2456465351239787,
+        "angle_deg": 20.613894397869572,
+        "speed_m_s": 3.6073311546013183,
+        "flight_s": 0.5618633044082157,
+        "required_movement_m": 0.10590780766964253,
+        "target": [
+          0.4619434825637642,
+          -0.034040210710057965,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 11
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.0019999999999296,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 2.7824528593761495,
+      "arm_movement_m": 0.09783716666896097,
+      "intercept_error_m": 0.011482389194805112,
+      "episode_return": 41.82580935006095,
+      "episode_duration_s": 1.6399999999999302,
+      "throw": {
+        "position": [
+          0.661717596382027,
+          0.5419294829221297,
+          0.14023051104409284
+        ],
+        "velocity": [
+          -0.3071954285221607,
+          -0.9436628563031622,
+          3.1262902397390846
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.6297173435970631,
+        "angle_deg": 71.96811022810195,
+        "speed_m_s": 3.2800242805136395,
+        "flight_s": 0.6345363486821837,
+        "required_movement_m": 0.11109399680843993,
+        "target": [
+          0.4667909308357164,
+          -0.056858900303478906,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 12
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.0069999999998986,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 3.2328217852838397,
+      "arm_movement_m": 0.04174984374724343,
+      "intercept_error_m": 0.009843215708498087,
+      "episode_return": 42.18349831730043,
+      "episode_duration_s": 1.9199999999998993,
+      "throw": {
+        "position": [
+          1.341068572891774,
+          0.2056346908991532,
+          0.10172691414890184
+        ],
+        "velocity": [
+          -1.036530868724168,
+          -0.2674143122685784,
+          4.189190508870684
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.9019963287622992,
+        "angle_deg": 14.466276297905395,
+        "speed_m_s": 4.323797379137507,
+        "flight_s": 0.8426168680259096,
+        "required_movement_m": 0.09659037953948812,
+        "target": [
+          0.46767017867524024,
+          -0.01969311936989893,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 13
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.0069999999999186,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 2.990145049174454,
+      "arm_movement_m": 0.1834235002290286,
+      "intercept_error_m": 0.022011744988612917,
+      "episode_return": 40.71955061698077,
+      "episode_duration_s": 1.7399999999999192,
+      "throw": {
+        "position": [
+          0.9809538720257929,
+          -0.7721987722126717,
+          0.1317602803499588
+        ],
+        "velocity": [
+          -0.46092361886418254,
+          0.957285654069091,
+          3.7391822916576767
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.8050029149994575,
+        "angle_deg": -64.28964274560155,
+        "speed_m_s": 3.887200871598958,
+        "flight_s": 0.7576698849160496,
+        "required_movement_m": 0.08383514080936635,
+        "target": [
+          0.6317259267658786,
+          -0.04689226086235837,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 14
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.010999999999912,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 3.2819088851264038,
+      "arm_movement_m": 0.08686338444112202,
+      "intercept_error_m": 0.018800252218190355,
+      "episode_return": 40.07174386677907,
+      "episode_duration_s": 1.7999999999999126,
+      "throw": {
+        "position": [
+          1.4177861437605168,
+          -0.17708400866499277,
+          0.22395026292424852
+        ],
+        "velocity": [
+          -1.1382694157566453,
+          0.15127193632310382,
+          3.912560147885397
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.9374237809728271,
+        "angle_deg": -7.570046230365875,
+        "speed_m_s": 4.0775810687694385,
+        "flight_s": 0.8163741338788515,
+        "required_movement_m": 0.09112309464151802,
+        "target": [
+          0.48853243535139923,
+          -0.0535895126690421,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 15
+    },
+    {
+      "tool": "box",
+      "success": false,
+      "outcome": "rim_hit_no_entry",
+      "entered": false,
+      "contact": true,
+      "rim_hit": true,
+      "finger_strike": false,
+      "retention_s": 0.0,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 3.6367723678854187,
+      "arm_movement_m": 0.1551982686389262,
+      "intercept_error_m": 0.097029516889037,
+      "episode_return": -1.3591006303929392,
+      "episode_duration_s": 0.9600000000000007,
+      "throw": {
+        "position": [
+          1.4250924513385117,
+          -1.1764440645007563,
+          0.24999551150302302
+        ],
+        "velocity": [
+          -1.3169963869449435,
+          1.9764482961885488,
+          2.8966692241399263
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 1.480982968657,
+        "angle_deg": -56.32269476129446,
+        "speed_m_s": 3.7458670484698273,
+        "flight_s": 0.6235605916285678,
+        "required_movement_m": 0.06977377633300143,
+        "target": [
+          0.6038654051224366,
+          0.055991204393849955,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 16
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.0069999999999253,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 2.687204849170302,
+      "arm_movement_m": 0.10251031844699053,
+      "intercept_error_m": 0.021907180814753954,
+      "episode_return": 40.08131946029722,
+      "episode_duration_s": 1.6799999999999258,
+      "throw": {
+        "position": [
+          1.200875207904163,
+          -0.8171352250602442,
+          0.11172624759660721
+        ],
+        "velocity": [
+          -1.037070270394159,
+          1.22580439732172,
+          3.431660923270137
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 1.1056119865844272,
+        "angle_deg": -49.767696041601646,
+        "speed_m_s": 3.788721137604077,
+        "flight_s": 0.6885760587589336,
+        "required_movement_m": 0.08011784131398537,
+        "target": [
+          0.48677344846009146,
+          0.026924335656915772,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 17
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.012999999999903,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 3.1559746798648014,
+      "arm_movement_m": 0.05078898624044351,
+      "intercept_error_m": 0.009534136001241521,
+      "episode_return": 41.338760138061446,
+      "episode_duration_s": 1.8799999999999037,
+      "throw": {
+        "position": [
+          1.3093296059867614,
+          0.314244630657454,
+          0.09075028681644547
+        ],
+        "velocity": [
+          -1.0608200204185863,
+          -0.4469382101110039,
+          3.8464774648493334
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.8849118712529254,
+        "angle_deg": 22.84636787158422,
+        "speed_m_s": 4.015031975834298,
+        "flight_s": 0.7687353655308051,
+        "required_movement_m": 0.07441680699245116,
+        "target": [
+          0.49383973982788343,
+          -0.02933257766191232,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 18
+    },
+    {
+      "tool": "box",
+      "success": false,
+      "outcome": "miss",
+      "entered": false,
+      "contact": false,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 0.0,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": null,
+      "arm_movement_m": 0.03681334670513725,
+      "intercept_error_m": 0.16974274099148695,
+      "episode_return": -1.0450818773150947,
+      "episode_duration_s": 0.8200000000000006,
+      "throw": {
+        "position": [
+          1.7328578010885072,
+          -0.23447653503869825,
+          0.2450179850188544
+        ],
+        "velocity": [
+          -1.419373848873262,
+          0.16494111722548496,
+          4.016015887676662
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 1.2031521498481847,
+        "angle_deg": -6.628437999549689,
+        "speed_m_s": 4.262653082891951,
+        "flight_s": 0.8419978960519217,
+        "required_movement_m": 0.09868198906000217,
+        "target": [
+          0.5377480066261026,
+          -0.09559646136238652,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 19
+    },
+    {
+      "tool": "box",
+      "success": false,
+      "outcome": "miss",
+      "entered": false,
+      "contact": false,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 0.0,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": null,
+      "arm_movement_m": 0.0599897554996945,
+      "intercept_error_m": 0.15958377702142013,
+      "episode_return": -0.8074706739085614,
+      "episode_duration_s": 0.6000000000000004,
+      "throw": {
+        "position": [
+          1.4188036292629649,
+          0.9998490195928781,
+          0.08236782892806366
+        ],
+        "velocity": [
+          -1.318567841284537,
+          -1.9103858955767825,
+          2.9009854219270577
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 1.3172627217172763,
+        "angle_deg": 55.38616599296495,
+        "speed_m_s": 3.7153616029024388,
+        "flight_s": 0.5674802250064829,
+        "required_movement_m": 0.13722424557263885,
+        "target": [
+          0.6705424540045034,
+          -0.08425719827824577,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 20
+    },
+    {
+      "tool": "box",
+      "success": false,
+      "outcome": "other_contact_no_entry",
+      "entered": false,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 0.0,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 1.4677281234220672,
+      "arm_movement_m": 0.09132206459579828,
+      "intercept_error_m": 0.13262829562950154,
+      "episode_return": -0.9580678576780325,
+      "episode_duration_s": 0.8200000000000006,
+      "throw": {
+        "position": [
+          1.3454221326896312,
+          0.4035179228220366,
+          0.21604536635837357
+        ],
+        "velocity": [
+          -0.7929340441260773,
+          -0.47008401032660224,
+          3.9895111253035087
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.7649291998474131,
+        "angle_deg": 30.66121107182829,
+        "speed_m_s": 4.0946211539065915,
+        "flight_s": 0.8298172468987934,
+        "required_movement_m": 0.12591876528491497,
+        "target": [
+          0.6874317872206034,
+          0.013434103561671516,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 21
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.0189999999999342,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 2.703864597085852,
+      "arm_movement_m": 0.06850893232398216,
+      "intercept_error_m": 0.006044245588763713,
+      "episode_return": 42.025049957743555,
+      "episode_duration_s": 1.5999999999999346,
+      "throw": {
+        "position": [
+          1.171339948128161,
+          0.27223926152163397,
+          0.2154260356911758
+        ],
+        "velocity": [
+          -1.1731452679312169,
+          -0.6328815087437953,
+          2.653037759675968
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.7529203111310836,
+        "angle_deg": 28.34571287611878,
+        "speed_m_s": 2.969076990925919,
+        "flight_s": 0.5648441847122674,
+        "required_movement_m": 0.1006578144878454,
+        "target": [
+          0.5086956657144983,
+          -0.0852401783042248,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 22
+    },
+    {
+      "tool": "box",
+      "success": false,
+      "outcome": "rim_hit_no_entry",
+      "entered": false,
+      "contact": true,
+      "rim_hit": true,
+      "finger_strike": false,
+      "retention_s": 0.0,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 3.2288996491978637,
+      "arm_movement_m": 0.08641624143686824,
+      "intercept_error_m": 0.12426189352115874,
+      "episode_return": -0.8038526925907478,
+      "episode_duration_s": 0.6800000000000005,
+      "throw": {
+        "position": [
+          1.3395951409944669,
+          0.5898727518020499,
+          0.10247731843378455
+        ],
+        "velocity": [
+          -1.055009195421842,
+          -0.7594689413588452,
+          3.361544172425369
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.8724991223733725,
+        "angle_deg": 35.748962598909145,
+        "speed_m_s": 3.604138828968763,
+        "flight_s": 0.6711854452655839,
+        "required_movement_m": 0.10591041490200812,
+        "target": [
+          0.6314883244059725,
+          0.08012825223073172,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 23
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.0189999999999253,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 2.5809984003622395,
+      "arm_movement_m": 0.04326412258043301,
+      "intercept_error_m": 0.019249219782856007,
+      "episode_return": 40.908840546305434,
+      "episode_duration_s": 1.6799999999999258,
+      "throw": {
+        "position": [
+          1.1487001546372466,
+          -0.5949763500861807,
+          0.08911213991820828
+        ],
+        "velocity": [
+          -0.9859541527597218,
+          0.9539119873634254,
+          3.407819191451417
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.928362713269613,
+        "angle_deg": -44.053690422859155,
+        "speed_m_s": 3.673592970458808,
+        "flight_s": 0.6767085864265203,
+        "required_movement_m": 0.09525164341365129,
+        "target": [
+          0.48149651364185786,
+          0.05054408245783575,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 24
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 0.9999999999999164,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 3.3551562204014793,
+      "arm_movement_m": 0.07377098957521387,
+      "intercept_error_m": 0.026033188209579988,
+      "episode_return": 40.79003283539471,
+      "episode_duration_s": 1.759999999999917,
+      "throw": {
+        "position": [
+          1.4299098108383568,
+          0.6683511495818658,
+          0.17681614574107568
+        ],
+        "velocity": [
+          -1.1732988379821823,
+          -1.0077059414520328,
+          3.794862658708901
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 1.2078079046836825,
+        "angle_deg": 40.65814533711804,
+        "speed_m_s": 4.097936557111549,
+        "flight_s": 0.7809227454911309,
+        "required_movement_m": 0.12815310909257666,
+        "target": [
+          0.5136540609997573,
+          -0.11858934086458064,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 25
+    },
+    {
+      "tool": "box",
+      "success": false,
+      "outcome": "rim_hit_no_entry",
+      "entered": false,
+      "contact": true,
+      "rim_hit": true,
+      "finger_strike": false,
+      "retention_s": 0.0,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 3.5952960375469862,
+      "arm_movement_m": 0.09871623500279786,
+      "intercept_error_m": 0.07144728179878988,
+      "episode_return": -1.666749492697482,
+      "episode_duration_s": 1.1999999999999786,
+      "throw": {
+        "position": [
+          1.7088859213453778,
+          0.5743948385208169,
+          0.2091534964411812
+        ],
+        "velocity": [
+          -1.5805091479710416,
+          -0.7159471171566845,
+          3.775329275692168
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 1.3625697522374622,
+        "angle_deg": 24.369818712406115,
+        "speed_m_s": 4.154960960259851,
+        "flight_s": 0.7852952611238373,
+        "required_movement_m": 0.09529180841429132,
+        "target": [
+          0.46771957728084523,
+          0.012164960202399724,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 26
+    },
+    {
+      "tool": "box",
+      "success": false,
+      "outcome": "rim_hit_no_entry",
+      "entered": false,
+      "contact": true,
+      "rim_hit": true,
+      "finger_strike": false,
+      "retention_s": 0.0,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 3.692450364554175,
+      "arm_movement_m": 0.0757229059477612,
+      "intercept_error_m": 0.07608010983896328,
+      "episode_return": -1.4794898585701906,
+      "episode_duration_s": 1.1399999999999852,
+      "throw": {
+        "position": [
+          1.7617861605406149,
+          -0.41929801928153976,
+          0.12561911075073406
+        ],
+        "velocity": [
+          -1.601941258682346,
+          0.5915778016718402,
+          4.06181114887221
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 1.4042073906250416,
+        "angle_deg": -20.268586809218334,
+        "speed_m_s": 4.406187683338313,
+        "flight_s": 0.8222882492359783,
+        "required_movement_m": 0.1355103315375204,
+        "target": [
+          0.4445286875598292,
+          0.06714945554206651,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 27
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.0119999999999387,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 2.6689809804454887,
+      "arm_movement_m": 0.06026923078310862,
+      "intercept_error_m": 0.009098569516642667,
+      "episode_return": 42.537254962384125,
+      "episode_duration_s": 1.559999999999939,
+      "throw": {
+        "position": [
+          0.653161742316303,
+          0.6683866029498071,
+          0.19725511457019712
+        ],
+        "velocity": [
+          -0.25909200177147973,
+          -1.3734889374568573,
+          2.4967937693799613
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.7375141369453025,
+        "angle_deg": 79.31737779507623,
+        "speed_m_s": 2.861394704250519,
+        "flight_s": 0.5276579278232161,
+        "required_movement_m": 0.07260044141579675,
+        "target": [
+          0.516449793545995,
+          -0.056345723676789077,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 28
+    },
+    {
+      "tool": "box",
+      "success": false,
+      "outcome": "rim_hit_no_entry",
+      "entered": false,
+      "contact": true,
+      "rim_hit": true,
+      "finger_strike": false,
+      "retention_s": 0.0,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 2.799204634456823,
+      "arm_movement_m": 0.1411521439620902,
+      "intercept_error_m": 0.06478510931822253,
+      "episode_return": -1.0464018340177177,
+      "episode_duration_s": 0.8200000000000006,
+      "throw": {
+        "position": [
+          1.1575381944448948,
+          -0.6148490499334647,
+          0.0968974197321332
+        ],
+        "velocity": [
+          -0.8386711602766268,
+          1.0794461844416874,
+          2.899476378373359
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.7826634681012109,
+        "angle_deg": -52.15473029568084,
+        "speed_m_s": 3.2055477923329345,
+        "flight_s": 0.5725586552760381,
+        "required_movement_m": 0.11516244648362478,
+        "target": [
+          0.6773497626981148,
+          0.003197205873318027,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 29
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 0.9999999999999386,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 2.8608654618189053,
+      "arm_movement_m": 0.11204810010915063,
+      "intercept_error_m": 0.0459763814067254,
+      "episode_return": 40.62774685144378,
+      "episode_duration_s": 1.559999999999939,
+      "throw": {
+        "position": [
+          1.4945365422944352,
+          0.433232364465261,
+          0.1417864857854138
+        ],
+        "velocity": [
+          -1.7222863753008486,
+          -0.9666028468170544,
+          2.695532790928696
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 1.0800088403232415,
+        "angle_deg": 29.302550395418365,
+        "speed_m_s": 3.341629609785264,
+        "flight_s": 0.5468422728632276,
+        "required_movement_m": 0.095820441011219,
+        "target": [
+          0.5527175463035493,
+          -0.0953469332442433,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 30
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.0009999999999342,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 2.81048055082008,
+      "arm_movement_m": 0.15984164364756165,
+      "intercept_error_m": 0.02511537494700457,
+      "episode_return": 40.15200028019841,
+      "episode_duration_s": 1.5999999999999346,
+      "throw": {
+        "position": [
+          0.596377475224545,
+          0.7047100020294377,
+          0.23930135820516324
+        ],
+        "velocity": [
+          -0.2865632921457437,
+          -1.2005482628967243,
+          2.723657740836263
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.7240854526591307,
+        "angle_deg": 76.57505750662472,
+        "speed_m_s": 2.9902752617722412,
+        "flight_s": 0.5866484227991575,
+        "required_movement_m": 0.13396676242892097,
+        "target": [
+          0.4282655718551102,
+          0.0004102571068059647,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 31
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.0019999999999163,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 2.802282242265947,
+      "arm_movement_m": 0.19346966905366156,
+      "intercept_error_m": 0.008844529154139372,
+      "episode_return": 41.52598772958137,
+      "episode_duration_s": 1.759999999999917,
+      "throw": {
+        "position": [
+          0.8645871249410684,
+          -0.532157168666195,
+          0.16538395203320622
+        ],
+        "velocity": [
+          -0.3940694763089533,
+          0.506000336013284,
+          3.8246075280030807
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.5028075585071677,
+        "angle_deg": -52.08879412712504,
+        "speed_m_s": 3.8780084883173997,
+        "flight_s": 0.783985697771446,
+        "required_movement_m": 0.1356203174254711,
+        "target": [
+          0.5556422915865653,
+          -0.1354601421642344,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 32
+    },
+    {
+      "tool": "box",
+      "success": false,
+      "outcome": "rim_hit_no_entry",
+      "entered": false,
+      "contact": true,
+      "rim_hit": true,
+      "finger_strike": false,
+      "retention_s": 0.0,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 3.375848300207391,
+      "arm_movement_m": 0.08611692095817813,
+      "intercept_error_m": 0.11264766171450508,
+      "episode_return": -0.8949150749553934,
+      "episode_duration_s": 0.6600000000000005,
+      "throw": {
+        "position": [
+          1.6494687788216758,
+          0.5094434612686032,
+          0.24314804019720643
+        ],
+        "velocity": [
+          -1.7643224460571736,
+          -0.6380982818918224,
+          2.9072049234227415
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 1.1697414805169815,
+        "angle_deg": 19.883416172651096,
+        "speed_m_s": 3.4600351989232556,
+        "flight_s": 0.6234740284762132,
+        "required_movement_m": 0.1123341993681422,
+        "target": [
+          0.5494595558474035,
+          0.11160575489375835,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 33
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.0179999999999163,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 2.844904180504095,
+      "arm_movement_m": 0.10366367389566362,
+      "intercept_error_m": 0.014189154279084213,
+      "episode_return": 40.85055964395341,
+      "episode_duration_s": 1.759999999999917,
+      "throw": {
+        "position": [
+          1.149956148550376,
+          -0.2812861060174558,
+          0.07300759502713512
+        ],
+        "velocity": [
+          -0.9193975082490635,
+          0.27609392115997233,
+          3.8858025857122276
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.7412182925018792,
+        "angle_deg": -16.714946641422692,
+        "speed_m_s": 4.0026218115884875,
+        "flight_s": 0.7721360559850521,
+        "required_movement_m": 0.1398750087278603,
+        "target": [
+          0.4400561826484597,
+          -0.06810403465154684,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 34
+    },
+    {
+      "tool": "box",
+      "success": false,
+      "outcome": "other_contact_no_entry",
+      "entered": false,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 0.0,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 3.577307713475284,
+      "arm_movement_m": 0.08188735125051977,
+      "intercept_error_m": 0.177442801760464,
+      "episode_return": -0.8140354566699597,
+      "episode_duration_s": 0.5600000000000004,
+      "throw": {
+        "position": [
+          1.5155083263704061,
+          0.858886832632735,
+          0.2401366535954148
+        ],
+        "velocity": [
+          -1.684846017272253,
+          -1.4204353022994742,
+          2.4059183800481256
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 1.1587598920584345,
+        "angle_deg": 40.13307754966195,
+        "speed_m_s": 3.2626347943633176,
+        "flight_s": 0.5258220551206614,
+        "required_movement_m": 0.13068119696160518,
+        "target": [
+          0.6295791310064487,
+          0.11199062281168765,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 35
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.015999999999912,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 3.0517642445521966,
+      "arm_movement_m": 0.12268157885891794,
+      "intercept_error_m": 0.013053869694671209,
+      "episode_return": 41.43319676345135,
+      "episode_duration_s": 1.7999999999999126,
+      "throw": {
+        "position": [
+          0.9292173566692978,
+          0.36376257073980667,
+          0.09999142896710651
+        ],
+        "velocity": [
+          -0.5659067460314234,
+          -0.3674528657443263,
+          4.074419005284862
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.5522381137657955,
+        "angle_deg": 32.99634859304254,
+        "speed_m_s": 4.12991068721517,
+        "flight_s": 0.8184476022626452,
+        "required_movement_m": 0.11498782474165795,
+        "target": [
+          0.46605233727562356,
+          0.06302165382682509,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 36
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.0039999999999276,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 2.745742897048873,
+      "arm_movement_m": 0.09600295695808422,
+      "intercept_error_m": 0.00382162853647995,
+      "episode_return": 42.039055662561125,
+      "episode_duration_s": 1.659999999999928,
+      "throw": {
+        "position": [
+          1.0237357501645434,
+          0.23455454751840732,
+          0.21603518143254885
+        ],
+        "velocity": [
+          -0.8271737077475828,
+          -0.264621977580593,
+          3.104970139197962
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.5678996840595022,
+        "angle_deg": 17.740046449269784,
+        "speed_m_s": 3.224140303882348,
+        "flight_s": 0.653907803676093,
+        "required_movement_m": 0.1004351412819004,
+        "target": [
+          0.4828404076727111,
+          0.061516171354257396,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 37
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 0.9999999999999097,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 2.8966214614176433,
+      "arm_movement_m": 0.21776698222828145,
+      "intercept_error_m": 0.019156183361302783,
+      "episode_return": 40.82185980415815,
+      "episode_duration_s": 1.8199999999999104,
+      "throw": {
+        "position": [
+          0.7884249215311481,
+          0.8548761796571378,
+          0.09626388738329689
+        ],
+        "velocity": [
+          -0.20338818426563993,
+          -1.030995034721255,
+          3.787233421984939
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.7964712355585939,
+        "angle_deg": 78.84034466882287,
+        "speed_m_s": 3.9303249875447333,
+        "flight_s": 0.7579195608495619,
+        "required_movement_m": 0.10289335011159631,
+        "target": [
+          0.6342730382305445,
+          0.07346487570312527,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 38
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.0089999999999009,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 3.2903397199628395,
+      "arm_movement_m": 0.05422160039212732,
+      "intercept_error_m": 0.01526105772959342,
+      "episode_return": 43.783598961683765,
+      "episode_duration_s": 1.8999999999999015,
+      "throw": {
+        "position": [
+          0.9847413767633357,
+          0.3920805369773432,
+          0.1930228942205059
+        ],
+        "velocity": [
+          -0.6131131217362205,
+          -0.542395019615085,
+          3.9738678912786933
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.6721385463658714,
+        "angle_deg": 41.49781668813404,
+        "speed_m_s": 4.057305272552726,
+        "flight_s": 0.8210866194274264,
+        "required_movement_m": 0.09687261197210806,
+        "target": [
+          0.48132239631034635,
+          -0.05327275607267958,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 39
+    },
+    {
+      "tool": "box",
+      "success": false,
+      "outcome": "rim_hit_no_entry",
+      "entered": false,
+      "contact": true,
+      "rim_hit": true,
+      "finger_strike": false,
+      "retention_s": 0.0,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 3.3343389468823332,
+      "arm_movement_m": 0.16037114759336085,
+      "intercept_error_m": 0.09832747259708594,
+      "episode_return": -1.1254787134470334,
+      "episode_duration_s": 0.7800000000000006,
+      "throw": {
+        "position": [
+          1.2122945643128649,
+          0.8711683702816646,
+          0.25945657196731503
+        ],
+        "velocity": [
+          -0.8170547023314503,
+          -1.0781667961924835,
+          3.357904728094334
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.9686276584608925,
+        "angle_deg": 52.84447914535065,
+        "speed_m_s": 3.6201583100704564,
+        "flight_s": 0.7160258595167266,
+        "required_movement_m": 0.11859287742926562,
+        "target": [
+          0.627262268803805,
+          0.09917306333554626,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 40
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.001999999999923,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 2.8750959271318774,
+      "arm_movement_m": 0.1097202411895206,
+      "intercept_error_m": 0.00935842052602713,
+      "episode_return": 41.160519870128276,
+      "episode_duration_s": 1.6999999999999236,
+      "throw": {
+        "position": [
+          1.0744645171309095,
+          -0.1786810843778034,
+          0.22552673576953092
+        ],
+        "velocity": [
+          -0.717452873230373,
+          0.146800516992011,
+          3.361822999394751
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.5180623345970471,
+        "angle_deg": -11.563870864272644,
+        "speed_m_s": 3.4406602413425187,
+        "flight_s": 0.7074285239511939,
+        "required_movement_m": 0.0749768020577138,
+        "target": [
+          0.5669178900170037,
+          -0.07483021132687288,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 41
+    },
+    {
+      "tool": "box",
+      "success": false,
+      "outcome": "rim_hit_no_entry",
+      "entered": false,
+      "contact": true,
+      "rim_hit": true,
+      "finger_strike": false,
+      "retention_s": 0.0,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 2.940361879399638,
+      "arm_movement_m": 0.17449446897035395,
+      "intercept_error_m": 0.07244736825353931,
+      "episode_return": -1.3776933684958506,
+      "episode_duration_s": 1.2999999999999676,
+      "throw": {
+        "position": [
+          1.4029708537316399,
+          -0.338354172582686,
+          0.20749557738911656
+        ],
+        "velocity": [
+          -1.4022081362962184,
+          0.523032580093821,
+          2.588444025656008
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.8222293641906975,
+        "angle_deg": -20.45583625827112,
+        "speed_m_s": 2.989948697099867,
+        "flight_s": 0.5494056717520525,
+        "required_movement_m": 0.08689625604312168,
+        "target": [
+          0.6325897506736224,
+          -0.050997106568031074,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 42
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.0079999999999387,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 3.230277086451878,
+      "arm_movement_m": 0.1348965663075281,
+      "intercept_error_m": 0.02879001217304844,
+      "episode_return": 40.27938892357935,
+      "episode_duration_s": 1.559999999999939,
+      "throw": {
+        "position": [
+          1.433674388700259,
+          -0.7486929226071459,
+          0.12889778034264615
+        ],
+        "velocity": [
+          -1.6651975615545453,
+          1.659490543868222,
+          2.5596467972238437
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 1.2080197328089946,
+        "angle_deg": -44.90164860717737,
+        "speed_m_s": 3.475425658927771,
+        "flight_s": 0.5138513203736993,
+        "required_movement_m": 0.10522820043167586,
+        "target": [
+          0.5780104230123915,
+          0.1040384845072082,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 43
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.0119999999999099,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 3.438552592001658,
+      "arm_movement_m": 0.18769338017659365,
+      "intercept_error_m": 0.01113080226631607,
+      "episode_return": 40.760398154279926,
+      "episode_duration_s": 1.8199999999999104,
+      "throw": {
+        "position": [
+          0.8004552441023295,
+          1.1222926938242404,
+          0.16562098890033283
+        ],
+        "velocity": [
+          -0.3620360030986749,
+          -1.400359692179792,
+          4.0333202843332465
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 1.1952732632925689,
+        "angle_deg": 75.50466491393792,
+        "speed_m_s": 4.284827867141872,
+        "flight_s": 0.8263772217189986,
+        "required_movement_m": 0.07025506662330147,
+        "target": [
+          0.5012769376993957,
+          -0.03493265800656829,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 44
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.0049999999999386,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 2.502493758309373,
+      "arm_movement_m": 0.09159799390146117,
+      "intercept_error_m": 0.011648585299958419,
+      "episode_return": 40.877351796928835,
+      "episode_duration_s": 1.559999999999939,
+      "throw": {
+        "position": [
+          0.9115946115315865,
+          -0.3178502012780838,
+          0.23933194344642073
+        ],
+        "velocity": [
+          -0.8377732500357187,
+          0.6616224517855276,
+          2.4485211748764164
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.5697166001157711,
+        "angle_deg": -38.299536953566395,
+        "speed_m_s": 2.671116663682118,
+        "flight_s": 0.5336801804875653,
+        "required_movement_m": 0.10390044771429871,
+        "target": [
+          0.46449163224487,
+          0.035244588205442,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 45
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.0119999999999076,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 3.4880201490900498,
+      "arm_movement_m": 0.12830299189430308,
+      "intercept_error_m": 0.03473283946420128,
+      "episode_return": 40.55430211034276,
+      "episode_duration_s": 1.8399999999999082,
+      "throw": {
+        "position": [
+          1.3855193212936312,
+          0.9540552394363381,
+          0.19510734832092513
+        ],
+        "velocity": [
+          -1.1077153938983055,
+          -1.2333776395662643,
+          3.935079027429511
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 1.349103751195348,
+        "angle_deg": 48.07250218825314,
+        "speed_m_s": 4.270023506700744,
+        "flight_s": 0.813798587319772,
+        "required_movement_m": 0.09261303037472059,
+        "target": [
+          0.4840620985868255,
+          -0.049665741274482644,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 46
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 0.9999999999999297,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 2.4493891984451617,
+      "arm_movement_m": 0.09189193578756048,
+      "intercept_error_m": 0.010593727076471039,
+      "episode_return": 40.69206040073967,
+      "episode_duration_s": 1.6399999999999302,
+      "throw": {
+        "position": [
+          0.8684357816091217,
+          -0.5144526546623805,
+          0.16372978940251265
+        ],
+        "velocity": [
+          -0.6240614024588718,
+          0.8029317747008603,
+          3.1205520564632434
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.6517217066856352,
+        "angle_deg": -52.144633117742636,
+        "speed_m_s": 3.2820720903051757,
+        "flight_s": 0.640870061157613,
+        "required_movement_m": 0.09373827340912345,
+        "target": [
+          0.46849351244919885,
+          0.00012228089555052973,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 47
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.012999999999932,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 2.8996384497624432,
+      "arm_movement_m": 0.0533654590793054,
+      "intercept_error_m": 0.015423703720451348,
+      "episode_return": 40.855567695071976,
+      "episode_duration_s": 1.6199999999999324,
+      "throw": {
+        "position": [
+          1.4003881450163806,
+          0.3974385855952262,
+          0.14950821898459865
+        ],
+        "velocity": [
+          -1.48348895725922,
+          -0.7499563605170565,
+          2.9398708488599525
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.9965698925916469,
+        "angle_deg": 26.818218479553224,
+        "speed_m_s": 3.377279176640062,
+        "flight_s": 0.5995199553263167,
+        "required_movement_m": 0.07311793868870889,
+        "target": [
+          0.5110069116332489,
+          -0.05217521815864663,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 48
+    },
+    {
+      "tool": "box",
+      "success": true,
+      "outcome": "catch",
+      "entered": true,
+      "contact": true,
+      "rim_hit": false,
+      "finger_strike": false,
+      "retention_s": 1.0079999999999032,
+      "first_bounce_m": null,
+      "first_bounce_complete": false,
+      "impact_relative_speed_m_s": 3.2448075051398604,
+      "arm_movement_m": 0.09801247947316755,
+      "intercept_error_m": 0.006488106854922065,
+      "episode_return": 42.39140492683745,
+      "episode_duration_s": 1.8799999999999037,
+      "throw": {
+        "position": [
+          1.234177480920601,
+          0.5224179113570446,
+          0.23604322495360325
+        ],
+        "velocity": [
+          -0.9729286870816839,
+          -0.6286806323328444,
+          3.7712991621012235
+        ],
+        "kind": "varied_lob"
+      },
+      "meta": {
+        "distance_m": 0.9166021421620535,
+        "angle_deg": 32.869469067941495,
+        "speed_m_s": 3.945190355063023,
+        "flight_s": 0.7912836445412682,
+        "required_movement_m": 0.10104632089538955,
+        "target": [
+          0.4643149235278551,
+          0.024953209352202434,
+          0.1490438715851884
+        ],
+        "level": 1.0
+      },
+      "rejected_before_launch": 0,
+      "episode": 49
+    }
+  ],
+  "examples": {
+    "passing": "artifacts/original-model/box/examples/passing.json",
+    "failing": "artifacts/original-model/box/examples/failing.json"
+  },
+  "wall_s": 6.635848083999008,
+  "throws_sha256": "5d8c1beecb05faec11d93ae02c4d1fddc10e64f30a234c506de8400aecdbec58"
+}

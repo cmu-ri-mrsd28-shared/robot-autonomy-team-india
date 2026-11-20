@@ -1,0 +1,25 @@
+{
+  "tool": "box",
+  "status": "completed",
+  "rate": 0.72,
+  "successes": 36,
+  "episodes": 50,
+  "baseline_rate": 0.64,
+  "gate_pass": false,
+  "train_seconds": 2253.2526743750204,
+  "online_steps": 300000,
+  "prior_transitions": 4554,
+  "parameters": {
+    "actor": 26758,
+    "critics": 169230,
+    "total": 195988
+  },
+  "examples": {
+    "passing": "artifacts/original-model/box/examples/passing.json",
+    "failing": "artifacts/original-model/box/examples/failing.json"
+  },
+  "wilson95": [
+    0.5833461285401034,
+    0.8252598564231963
+  ]
+}

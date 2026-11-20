@@ -1,0 +1,87 @@
+{
+  "algorithm": "sb3-contrib CrossQ",
+  "actor": [
+    128,
+    128
+  ],
+  "critics": [
+    256,
+    256
+  ],
+  "n_critics": 2,
+  "parameters": {
+    "actor": 26758,
+    "critics": 169230,
+    "total": 195988
+  },
+  "learning_rate": 0.001,
+  "batch_size": 256,
+  "gamma": 0.99,
+  "gradient_steps_per_transition": 1,
+  "actor_update_interval": 3,
+  "entropy": "auto_0.1",
+  "buffer_size": 250000,
+  "device": "cpu",
+  "threads": 4,
+  "online_steps": 300000,
+  "seed": 112021,
+  "physics": {
+    "timestep": 0.001,
+    "control_dt": 0.02,
+    "duration": 3.5,
+    "radius": 0.02,
+    "mass": 0.0027,
+    "friction": [
+      0.25,
+      0.005,
+      0.0001
+    ],
+    "solref": [
+      0.006,
+      0.35
+    ],
+    "solimp": [
+      0.95,
+      0.99,
+      0.001
+    ],
+    "box_width": 0.12,
+    "box_depth": 0.12,
+    "box_height": 0.09,
+    "box_mass": 0.25,
+    "printed_box": true,
+    "retention_seconds": 1.0
+  },
+  "observation_dimension": 60,
+  "action_dimension": 7,
+  "prior_episodes": 64,
+  "optimizer": "Adam",
+  "optimizer_kwargs": {
+    "lr": 0.001,
+    "betas": [
+      0.5,
+      0.999
+    ],
+    "eps": 1e-08,
+    "weight_decay": 0,
+    "amsgrad": false,
+    "maximize": false,
+    "foreach": null,
+    "capturable": false,
+    "differentiable": false,
+    "fused": null,
+    "decoupled_weight_decay": false
+  },
+  "versions": {
+    "torch": "2.15.0",
+    "sb3-contrib": "2.9.2",
+    "stable-baselines3": "2.9.2",
+    "mujoco": "3.3.7",
+    "robosuite": "1.5.2"
+  },
+  "platform": "macOS-27.0.1-arm64-arm-64bit",
+  "bank_seeds": {
+    "validation": 20261202,
+    "heldout": 20261203
+  }
+}

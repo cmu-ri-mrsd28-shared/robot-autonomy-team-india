@@ -1,0 +1,18 @@
+[project]
+name = "franka-catchbox"
+version = "0.1.0"
+requires-python = ">=3.11,<3.13"
+dependencies = ["robosuite==1.5.2", "mujoco==3.3.7", "numpy==1.26.4"]
+
+[project.optional-dependencies]
+training = ["torch>=2.5,<3", "sb3-contrib>=2.7,<3"]
+
+[project.scripts]
+catchbox = "catchbox.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["catchbox*"]

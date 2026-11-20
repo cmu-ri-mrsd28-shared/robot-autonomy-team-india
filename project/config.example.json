@@ -1,0 +1,27 @@
+{
+  "timestep": 0.001,
+  "control_dt": 0.02,
+  "duration": 3.5,
+  "radius": 0.02,
+  "mass": 0.0027,
+  "friction": [
+    0.25,
+    0.005,
+    0.0001
+  ],
+  "solref": [
+    0.006,
+    0.35
+  ],
+  "solimp": [
+    0.95,
+    0.99,
+    0.001
+  ],
+  "box_width": 0.12,
+  "box_depth": 0.12,
+  "box_height": 0.09,
+  "box_mass": 0.25,
+  "retention_seconds": 1.0,
+  "printed_box": true
+}
